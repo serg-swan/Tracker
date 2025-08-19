@@ -6,7 +6,7 @@
 //
 import UIKit
 
-struct Item {
+struct TableviewCellData {
     var title: String
     var subtitle: String?
 }
@@ -18,7 +18,7 @@ final class NewTrackerViewController: UIViewController {
     // MARK: Private Properties
     
     private var categoryName = "Работа"
-    private var name = String()
+    private var name:String = ""
     private var emoji: String = "💼"
     private var color: String = "YP Blue"
     private var timeTable: [WeekDay] = []
@@ -29,15 +29,15 @@ final class NewTrackerViewController: UIViewController {
     private let cancelButton = UIButton()
     private let cellIdentifier = "cell"
     private var items = [
-        Item(title: "Категория", subtitle: nil),
-        Item(title: "Расписание", subtitle: nil)
+        TableviewCellData(title: "Категория", subtitle: nil),
+        TableviewCellData(title: "Расписание", subtitle: nil)
     ]
     
     //MARK: Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "YP White")
+        view.backgroundColor = UIColor(resource: .ypWhite)
         title = "Новая привычка"
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -58,12 +58,12 @@ final class NewTrackerViewController: UIViewController {
         textField.placeholder = "Введите название трекера"
         textField.layer.cornerRadius = 16
         textField.clipsToBounds = true
-        textField.textColor = UIColor(named: "YP Black")
+        textField.textColor = UIColor(resource: .ypBlack) 
         textField.borderStyle = .none
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
         textField.leftViewMode = .always
         textField.clearButtonMode = .whileEditing
-        textField.backgroundColor = UIColor(named: "YP Background")
+        textField.backgroundColor = UIColor(resource: .ypBackground)
         textField.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         view.addSubview(textField)
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -77,6 +77,11 @@ final class NewTrackerViewController: UIViewController {
     
     
     private func setupTableViewUI() {
+        tableView.estimatedSectionHeaderHeight = 0
+        tableView.estimatedSectionFooterHeight = 0
+        tableView.sectionHeaderHeight = 0
+        tableView.sectionFooterHeight = 0
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         tableView.delegate = self
         tableView.dataSource = self
         tableView.layer.cornerRadius = 16
@@ -89,15 +94,15 @@ final class NewTrackerViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: textField.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: textField.trailingAnchor),
-            tableView.heightAnchor.constraint(equalToConstant: 150)
+            tableView.heightAnchor.constraint(equalToConstant: 149)
         ])
     }
     
     private func setupCancelButtonUI() {
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        cancelButton.setTitleColor(UIColor(named: "YP Red"), for: .normal)
+        cancelButton.setTitleColor(UIColor(resource: .ypRed), for: .normal)
         cancelButton.layer.borderWidth = 1.0 // UIScreen.main.scale
-        cancelButton.layer.borderColor = UIColor(named: "YP Red")?.cgColor
+        cancelButton.layer.borderColor = UIColor(resource: .ypRed).cgColor
         cancelButton.layer.cornerRadius = 16
         cancelButton.layer.masksToBounds = true
         cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
@@ -115,8 +120,8 @@ final class NewTrackerViewController: UIViewController {
     
     private func setupMakeButtonUI() {
         makeButton.addTarget(self, action: #selector(makeButtonTapped), for: .touchUpInside)
-        makeButton.setTitleColor(UIColor(named: "YP White"), for: .normal)
-        makeButton.backgroundColor = UIColor(named: "YP Gray")
+        makeButton.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
+        makeButton.backgroundColor = UIColor(resource: .ypGray)
         makeButton.layer.cornerRadius = 16
         makeButton.layer.masksToBounds = true
         makeButton.isEnabled = false
@@ -135,7 +140,7 @@ final class NewTrackerViewController: UIViewController {
    
     private func makeButtonIsEnabled() {
         makeButton.isEnabled = !name.isEmpty && !timeTable.isEmpty && !emoji.isEmpty && !color.isEmpty && !categoryName.isEmpty
-        makeButton.backgroundColor = UIColor(named: "YP Black")
+        makeButton.backgroundColor = UIColor(resource: .ypBlack)
     }
     
     private func showWeekDaySelector(for indexPath: IndexPath) {
@@ -219,15 +224,16 @@ extension NewTrackerViewController: UITextFieldDelegate {
 // MARK: UITableViewDelegate, UITableViewDataSource
 
 extension NewTrackerViewController: UITableViewDelegate, UITableViewDataSource {
+   
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier)
         
         let item = items[indexPath.row]
-        cell.backgroundColor = UIColor(named: "YP Background")
+        cell.backgroundColor = UIColor(resource: .ypBackground)
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         cell.textLabel?.text = item.title
-        cell.detailTextLabel?.textColor = UIColor(named: "YP Gray")
+        cell.detailTextLabel?.textColor = UIColor(resource: .ypGray)
         cell.detailTextLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         cell.detailTextLabel?.text = item.subtitle ?? ""
         cell.accessoryType = .disclosureIndicator

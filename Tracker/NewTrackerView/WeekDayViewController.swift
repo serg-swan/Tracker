@@ -29,19 +29,27 @@ final class WeekDayViewController: UIViewController {
     }
     
     private func setupTableViewUI() {
+       
+        tableView.estimatedSectionHeaderHeight = 0
+        tableView.estimatedSectionFooterHeight = 0
+        tableView.sectionHeaderHeight = 0
+        tableView.sectionFooterHeight = 0
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         tableView.delegate = self
         tableView.dataSource = self
         tableView.layer.cornerRadius = 16
         tableView.clipsToBounds = true
         tableView.isScrollEnabled = false
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+        let cellHeight: CGFloat = 75
+        let totalHeight: CGFloat = CGFloat(days.count) * cellHeight
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: 525)
+            tableView.heightAnchor.constraint(equalToConstant: totalHeight)
         ])
     }
     
@@ -59,20 +67,25 @@ final class WeekDayViewController: UIViewController {
         NSLayoutConstraint.activate([
             returnButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             returnButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            returnButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            returnButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             returnButton.heightAnchor.constraint(equalToConstant: 60),
             ])
     }
     
     @objc private func switchValueDidChange(_ sender: UISwitch){
-        let weekDay = WeekDay.allCases[sender.tag]
-           if sender.isOn {
-               selectedDays.append(weekDay)
-           } else {
-               selectedDays.removeAll { $0 == weekDay }
-           }
-           returnButton.isEnabled = !selectedDays.isEmpty
-    }
+        guard let weekDay = WeekDay.allCases[safe: sender.tag] else {
+              print("Ошибка: неверный tag у свитча") 
+              return
+          }
+          
+          if sender.isOn {
+              selectedDays.append(weekDay)
+          } else {
+              selectedDays.removeAll { $0 == weekDay }
+          }
+          returnButton.isEnabled = !selectedDays.isEmpty
+      }
+
     
     @objc private func returnButtonTapped(){
         onDaysSelected?(selectedDays)
@@ -82,11 +95,13 @@ final class WeekDayViewController: UIViewController {
 }
 
 extension WeekDayViewController: UITableViewDelegate, UITableViewDataSource {
+
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = UITableViewCell(style: .default, reuseIdentifier: cellIdentifier)
         
-        cell.backgroundColor = UIColor(named: "YP Background")
+        cell.backgroundColor = UIColor(resource: .ypBackground)
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         cell.textLabel?.text = days[indexPath.row]
         let switchControl = UISwitch()
@@ -115,6 +130,11 @@ extension WeekDayViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     
+}
+extension Collection {
+    subscript (safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
 }
 
 

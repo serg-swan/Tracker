@@ -100,10 +100,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     func  setCompleted(_ isCompletedToday: Bool, color: UIColor) {
-        let plusCompletedImage = UIImage(named: "plusCompleted")
-        let completedImage = UIImage(named: "completedImage")
-        let coloredPlusCompletedImage = plusCompletedImage?.withTintColor(color, renderingMode: .alwaysOriginal)
-        let coloredImage = completedImage?.withTintColor(color, renderingMode: .alwaysOriginal)
+        let plusCompletedImage = UIImage(resource: .plusCompleted)
+        let completedImage = UIImage(resource: .completed)
+        let coloredPlusCompletedImage = plusCompletedImage.withTintColor(color, renderingMode: .alwaysOriginal)
+        let coloredImage = completedImage.withTintColor(color, renderingMode: .alwaysOriginal)
         if !isCompletedToday {
             button.setImage(coloredPlusCompletedImage, for: .normal)
         } else {

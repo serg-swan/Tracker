@@ -24,7 +24,7 @@ final class TrackersViewController: UIViewController {
     private let placeholderView =  UIView()
     private let cellIdentifier = "cell"
     private let headerIdentifier = "header"
-    private var currentSelectedDate = Date()
+    private var currentSelectedDate = Calendar.current.startOfDay(for: Date())
     private var displayCategories: [TrackerCategory] = []
     
     //MARK: Lifecycle
@@ -34,7 +34,7 @@ final class TrackersViewController: UIViewController {
         updateVisibleTrackers(for: currentSelectedDate.weekDay())
         collectionView.dataSource = self
         collectionView.delegate = self
-        view.backgroundColor = UIColor(named: "YP White")
+        view.backgroundColor = UIColor(resource: .ypWhite)
         setupNavigationBarUI()
         setupTextLabelUI()
         setupSearchControllerUI()
@@ -80,7 +80,7 @@ final class TrackersViewController: UIViewController {
         collectionView.allowsMultipleSelection = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: cellIdentifier)
-        collectionView.register(SupplementaryView.self,
+        collectionView.register(TrackersCollectionSectionHeader.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: headerIdentifier)
     }
@@ -95,12 +95,12 @@ final class TrackersViewController: UIViewController {
     private func setupNavigationBarUI() {
         navigationItem.title = ""
         let plusButton = UIBarButtonItem(
-            image: UIImage(named: "plusImage"),
+            image: UIImage(resource: .plus),
             style: .plain,
             target: self,
             action: #selector(handlePlusButtonTapped)
         )
-        plusButton.tintColor = UIColor(named: "YP Black")
+        plusButton.tintColor = UIColor(resource: .ypBlack)
         navigationItem.leftBarButtonItem = plusButton
         
         let datePicker = UIDatePicker()
@@ -115,7 +115,7 @@ final class TrackersViewController: UIViewController {
     
     private func setupTextLabelUI() {
         textLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        textLabel.textColor = UIColor(named: "YP Black")
+        textLabel.textColor = UIColor(resource: .ypBlack)
         textLabel.textAlignment = .left
         textLabel.text = "Трекеры"
         textLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -123,14 +123,14 @@ final class TrackersViewController: UIViewController {
     
     private func setupPlaceholderViewUI() {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "star")
+        imageView.image = UIImage(resource: .star)
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = UIColor(named: "YP Black")
+        imageView.tintColor = UIColor(resource: .ypBlack)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
         let questLabel = UILabel()
         questLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        questLabel.textColor = UIColor(named: "YP Black")
+        questLabel.textColor = UIColor(resource: .ypBlack)
         questLabel.textAlignment = .center
         questLabel.text = "Что будем отслеживать?"
         questLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -201,6 +201,7 @@ final class TrackersViewController: UIViewController {
         currentSelectedDate = startOfDay
         let selectedWeekDay = startOfDay.weekDay()
         updateVisibleTrackers(for: selectedWeekDay)
+        print(currentSelectedDate)
     }
     
     @objc private func handlePlusButtonTapped() {
@@ -304,11 +305,11 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView{
         
-        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as? SupplementaryView else {
+        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as? TrackersCollectionSectionHeader else {
             fatalError("Невозможно создать хедер")
         }
-        
-        view.titleLabel.text = displayCategories[indexPath.section].categoryName
+        let text = displayCategories[indexPath.section].categoryName
+        view.configureView(with: text) 
         return view
     }
     

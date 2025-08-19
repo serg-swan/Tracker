@@ -1,5 +1,5 @@
 //
-//  SupplementaryView.swift.swift
+//  TrackersCollectionSectionHeader.swift
 //  Tracker
 //
 //  Created by Сергей Лебедь on 03.08.2025.
@@ -7,8 +7,8 @@
 
 import UIKit
 
-final class SupplementaryView: UICollectionReusableView {
-    let titleLabel = UILabel()
+final class TrackersCollectionSectionHeader: UICollectionReusableView {
+  private let titleLabel = UILabel()
     
     
     override init(frame: CGRect) {
@@ -26,4 +26,9 @@ final class SupplementaryView: UICollectionReusableView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    func configureView(with title: String){
+        titleLabel.text = title
+    }
+    
 }
