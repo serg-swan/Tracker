@@ -22,6 +22,7 @@ final class NewTrackerViewController: UIViewController {
     private var emoji: String = "💼"
     private var color: String = "YP Blue"
     private var timeTable: [WeekDay] = []
+    
    
     private let textField = UITextField()
     private let tableView = UITableView(frame: .zero, style: .plain)
@@ -139,7 +140,7 @@ final class NewTrackerViewController: UIViewController {
     
    
     private func makeButtonIsEnabled() {
-        makeButton.isEnabled = !name.isEmpty && !timeTable.isEmpty && !emoji.isEmpty && !color.isEmpty && !categoryName.isEmpty
+        makeButton.isEnabled = !name.isEmpty && !timeTable.isEmpty && !emoji.isEmpty && !color.isEmpty  && !categoryName.isEmpty
         makeButton.backgroundColor = UIColor(resource: .ypBlack)
     }
     
@@ -179,7 +180,7 @@ final class NewTrackerViewController: UIViewController {
     }
     
     @objc private func  makeButtonTapped() {
-        let newTracker = Tracker.newTracker(name: name, emoji: emoji, color: color, timetable: timeTable)
+        let newTracker = Tracker.newTracker(name: name, emoji: emoji, color: color, timeTable: timeTable)
         let trackerCategory = TrackerCategory(categoryName: categoryName, trackers: [newTracker])
         
         makeTracker?(trackerCategory)

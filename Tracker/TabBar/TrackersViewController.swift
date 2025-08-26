@@ -168,7 +168,7 @@ final class TrackersViewController: UIViewController {
             return
         }
         displayCategories = categories.compactMap { category in
-            let activeTrackers = category.trackers.filter { $0.timetable.contains(weekDay) }
+            let activeTrackers = category.trackers.filter { $0.timeTable.contains(weekDay) }
             return activeTrackers.isEmpty ? nil : TrackerCategory(
                 categoryName: category.categoryName,
                 trackers: activeTrackers
@@ -289,8 +289,8 @@ extension TrackersViewController: UICollectionViewDataSource {
             fatalError("Невозможно создать ячейку типа TrackerCollectionViewCell")
         }
         let tracker = displayCategories[indexPath.section].trackers[indexPath.item]
-        let color = UIColor(named: tracker.color) ?? .clear
-        cell.trackerLabel.backgroundColor = color
+        let color = tracker.color
+        cell.trackerLabel.backgroundColor = UIColor(named: color)
         cell.delegate = self
         cell.nameLabel.text = tracker.name
         cell.emojiLabel.text = tracker.emoji
@@ -300,7 +300,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         let isCompletedToday = completedTrackers.contains { record in
             record.trackerId == tracker.id && calendar.isDate(record.date, inSameDayAs: currentSelectedDate)
         }
-        cell.setCompleted(isCompletedToday, color: color)
+        cell.setCompleted(isCompletedToday, color: UIColor(named: color) ?? .clear)
         return cell
     }
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView{
