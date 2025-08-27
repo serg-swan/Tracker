@@ -19,13 +19,24 @@ final class NewTrackerViewController: UIViewController {
     
     private var categoryName = "Работа"
     private var name:String = ""
+    private var emojiArray: [String] = [
+        "🙂", "😻", "🌺", "🐶", "❤️", "😱",
+        "😇", "😡", "🥶", "🤔", "🙌", "🍔",
+        "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
+    ]
     private var emoji: String = "💼"
+    private var colorArray: [String] = [
+       "Color1", "Color2", "Color3", "Color4", "Color5", "Color6",
+       "Color7", "Color8", "Color9", "Color10", "Color11", "Color12",
+       "Color13", "Color14", "Color15", "Color16", "Color17", "Color18"
+    ]
     private var color: String = "YP Blue"
     private var timeTable: [WeekDay] = []
     
-   
+    private let scrollView = UIScrollView()
     private let textField = UITextField()
     private let tableView = UITableView(frame: .zero, style: .plain)
+    private let collectionView: UICollectionView = .init(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let makeButton = UIButton()
     private let cancelButton = UIButton()
     private let cellIdentifier = "cell"

@@ -110,8 +110,6 @@
 			isa = PBXGroup;
 			children = (
 				E85261132E34F73800D1CED4 /* TabBarController.swift */,
-				E85261252E3510FD00D1CED4 /* TrackersViewController.swift */,
-				E85261272E35112600D1CED4 /* StatsViewController.swift */,
 			);
 			path = TabBar;
 			sourceTree = "<group>";
@@ -119,7 +117,9 @@
 		E852611B2E34F73800D1CED4 /* Tracker */ = {
 			isa = PBXGroup;
 			children = (
-				E8F120E02E5A267C0038D94E /* CoreData */,
+				E85261142E34F73800D1CED4 /* TabBar */,
+				E85261122E34F73800D1CED4 /* OnboardView */,
+				E8834C6D2E5F2FF7001BFE5E /* StatsViewController */,
 				E8F120CE2E59F92F0038D94E /* DaysValueTransformer.swift */,
 				E870C1272E54EAFD00D6B8C6 /* UserDefaults.swift */,
 				E85261152E34F73800D1CED4 /* AppDelegate.swift */,
@@ -128,11 +128,9 @@
 				E85261162E34F73800D1CED4 /* Assets.xcassets */,
 				E85261172E34F73800D1CED4 /* Info.plist */,
 				E85261192E34F73800D1CED4 /* LaunchScreen.storyboard */,
+				E8F120E02E5A267C0038D94E /* CoreData */,
 				E852614D2E3E34DD00D1CED4 /* Model */,
-				E85261142E34F73800D1CED4 /* TabBar */,
-				E85261122E34F73800D1CED4 /* OnboardView */,
-				E85261542E3FC29400D1CED4 /* TrackerCollectionViewCell.swift */,
-				E85261562E3FE27A00D1CED4 /* TrackersCollectionSectionHeader.swift */,
+				E8834C6C2E5F2FAD001BFE5E /* TrackersViewController */,
 				E847F04A2E4A726100196DC4 /* NewTrackerView */,
 			);
 			path = Tracker;
@@ -147,6 +145,24 @@
 				E85261522E3E802E00D1CED4 /* Week.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		E8834C6C2E5F2FAD001BFE5E /* TrackersViewController */ = {
+			isa = PBXGroup;
+			children = (
+				E85261252E3510FD00D1CED4 /* TrackersViewController.swift */,
+				E85261542E3FC29400D1CED4 /* TrackerCollectionViewCell.swift */,
+				E85261562E3FE27A00D1CED4 /* TrackersCollectionSectionHeader.swift */,
+			);
+			path = TrackersViewController;
+			sourceTree = "<group>";
+		};
+		E8834C6D2E5F2FF7001BFE5E /* StatsViewController */ = {
+			isa = PBXGroup;
+			children = (
+				E85261272E35112600D1CED4 /* StatsViewController.swift */,
+			);
+			path = StatsViewController;
 			sourceTree = "<group>";
 		};
 		E8F120E02E5A267C0038D94E /* CoreData */ = {
