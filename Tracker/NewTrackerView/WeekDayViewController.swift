@@ -26,13 +26,15 @@ final class WeekDayViewController: UIViewController {
         setupReturnButtonUI()
         setupTableViewUI()
        
-        
     }
     
     private func setupTableViewUI() {
-       
+        tableView.estimatedSectionHeaderHeight = 0
+        tableView.estimatedSectionFooterHeight = 0
+        tableView.sectionHeaderHeight = 0
+        tableView.sectionFooterHeight = 0
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
 
-        tableView.separatorStyle = .none
         tableView.delegate = self
         tableView.dataSource = self
         tableView.layer.cornerRadius = 16
@@ -84,7 +86,6 @@ final class WeekDayViewController: UIViewController {
           returnButton.isEnabled = !selectedDays.isEmpty
       }
 
-    
     @objc private func returnButtonTapped(){
         onDaysSelected?(selectedDays)
         selectedDays.removeAll()

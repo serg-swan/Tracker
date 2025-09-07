@@ -18,7 +18,7 @@ public final class TrackerRecordStore {
         let trackerCoreDataRecord = TrackerCoreDataRecord(context: context)
         trackerCoreDataRecord.date = date
         trackerCoreDataRecord.tracker = tracker
-     
+        
         CoreDataManager.shared.saveContext()
     }
     
@@ -28,11 +28,9 @@ public final class TrackerRecordStore {
             format: "date == %@ AND tracker == %@",
             date as NSDate,
             tracker
-            )
-        
+        )
         guard let record = try context.fetch(fetchRequest).first else {
-            
-       return      try addTrackerRecord(tracker: tracker, date: date)
+            return      try addTrackerRecord(tracker: tracker, date: date)
         }
         record.tracker = nil
         context.delete(record)

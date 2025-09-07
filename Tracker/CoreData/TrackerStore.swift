@@ -10,9 +10,9 @@ import CoreData
 
 public final class TrackerStore {
     private let context: NSManagedObjectContext
-      init(context: NSManagedObjectContext = CoreDataManager.shared.context) {
-          self.context = context
-      }
+    init(context: NSManagedObjectContext = CoreDataManager.shared.context) {
+        self.context = context
+    }
     
     func createTracker (tracker: Tracker, category: TrackerCoreDataCategory) throws {
         let trackerCoreData = TrackerCoreData(context: context)
@@ -21,9 +21,8 @@ public final class TrackerStore {
         trackerCoreData.emoji = tracker.emoji
         trackerCoreData.color = tracker.color
         trackerCoreData.timeTable = tracker.timeTable as NSObject
-        
         trackerCoreData.trackerCategory = category
-          
+        
         CoreDataManager.shared.saveContext()
     }
     
