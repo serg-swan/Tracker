@@ -11,39 +11,56 @@ struct TableviewCellData {
     var subtitle: String?
 }
 
+struct CollectionViewData {
+    let name: String
+    var cellData: [String]
+}
+
 final class NewTrackerViewController: UIViewController {
     
-    var makeTracker: ((TrackerCategory) -> Void)?
+    var makeTracker: ((Tracker, String) -> Void)? // этот метод уладить и соханять в кордвту
     
     // MARK: Private Properties
     
     private var categoryName = "Работа"
-    private var name:String = ""
-    private var emojiArray: [String] = [
+    private var name: String = ""
+    private var emoji: String = ""
+    private var color: String = ""
+    private let emojiArray: [String] = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱",
         "😇", "😡", "🥶", "🤔", "🙌", "🍔",
         "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
     ]
-    private var emoji: String = "💼"
-    private var colorArray: [String] = [
-       "Color1", "Color2", "Color3", "Color4", "Color5", "Color6",
-       "Color7", "Color8", "Color9", "Color10", "Color11", "Color12",
-       "Color13", "Color14", "Color15", "Color16", "Color17", "Color18"
+    
+    private let colorArray: [String] = [
+        "Color1", "Color2", "Color3", "Color4", "Color5", "Color6",
+        "Color7", "Color8", "Color9", "Color10", "Color11", "Color12",
+        "Color13", "Color14", "Color15", "Color16", "Color17", "Color18"
     ]
-    private var color: String = "YP Blue"
+    
+    
+    private lazy var collectionViewDataSource: [CollectionViewData] = [
+        CollectionViewData(name: "Emoji", cellData: emojiArray),
+        CollectionViewData(name: "Цвет", cellData: colorArray)
+    ]
+    
+    
     private var timeTable: [WeekDay] = []
     
-    private let scrollView = UIScrollView()
-    private let textField = UITextField()
-    private let tableView = UITableView(frame: .zero, style: .plain)
-    private let collectionView: UICollectionView = .init(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-    private let makeButton = UIButton()
-    private let cancelButton = UIButton()
-    private let cellIdentifier = "cell"
+    private lazy var textField = UITextField()
+    private lazy var tableView = UITableView(frame: .zero, style: .plain)
+    private lazy var collectionView: UICollectionView = .init(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    private lazy var makeButton = UIButton()
+    private lazy var cancelButton = UIButton()
+    
+    
+    private let tableViewCellIdentifier = "cell"
     private var items = [
         TableviewCellData(title: "Категория", subtitle: nil),
         TableviewCellData(title: "Расписание", subtitle: nil)
     ]
+    private var selectedEmojiIndexPath: IndexPath?
+    private var selectedColorIndexPath: IndexPath?
     
     //MARK: Lifecycle
     
@@ -61,16 +78,19 @@ final class NewTrackerViewController: UIViewController {
         setupTableViewUI()
         setupCancelButtonUI()
         setupMakeButtonUI()
+        setupCollectionViewUI()
     }
     
     //MARK: Private Methods
     
     private func setupTextFieldUI() {
+        textField.isEnabled = true
+        textField.isUserInteractionEnabled = true
         textField.delegate = self
         textField.placeholder = "Введите название трекера"
         textField.layer.cornerRadius = 16
         textField.clipsToBounds = true
-        textField.textColor = UIColor(resource: .ypBlack) 
+        textField.textColor = UIColor(resource: .ypBlack)
         textField.borderStyle = .none
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
         textField.leftViewMode = .always
@@ -99,7 +119,7 @@ final class NewTrackerViewController: UIViewController {
         tableView.layer.cornerRadius = 16
         tableView.clipsToBounds = true
         tableView.isScrollEnabled = false
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: tableViewCellIdentifier)
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -109,6 +129,26 @@ final class NewTrackerViewController: UIViewController {
             tableView.heightAnchor.constraint(equalToConstant: 149)
         ])
     }
+    
+    private func setupCollectionViewUI() {
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.backgroundColor = .clear
+        collectionView.allowsMultipleSelection = true
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.register(NewTrackerCollectionViewCell.self, forCellWithReuseIdentifier: NewTrackerCollectionViewCell.cellIdentifier)
+        collectionView.register(NewTrackerCollectionSectionHeader.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: NewTrackerCollectionSectionHeader.headerIdentifier)
+        view.addSubview(collectionView)
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 16),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: cancelButton.topAnchor, constant: -16)
+        ])
+    }
+    
     
     private func setupCancelButtonUI() {
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
@@ -149,10 +189,14 @@ final class NewTrackerViewController: UIViewController {
         ])
     }
     
-   
+    
     private func makeButtonIsEnabled() {
-        makeButton.isEnabled = !name.isEmpty && !timeTable.isEmpty && !emoji.isEmpty && !color.isEmpty  && !categoryName.isEmpty
-        makeButton.backgroundColor = UIColor(resource: .ypBlack)
+        if !name.isEmpty && !timeTable.isEmpty && !emoji.isEmpty && !color.isEmpty  && !categoryName.isEmpty {
+            makeButton.isEnabled = true
+            DispatchQueue.main.async {
+                self.makeButton.backgroundColor = UIColor(resource: .ypBlack)
+            }
+        }
     }
     
     private func showWeekDaySelector(for indexPath: IndexPath) {
@@ -166,10 +210,8 @@ final class NewTrackerViewController: UIViewController {
     
     private func handleDaySelection(_ days: [WeekDay], for indexPath: IndexPath) {
         timeTable = days
-        DispatchQueue.main.async {
-            self.makeButtonIsEnabled()
-        }
         updateCell(at: indexPath, with: days)
+        self.makeButtonIsEnabled()
     }
     
     private func updateCell(at indexPath: IndexPath, with days: [WeekDay]) {
@@ -192,10 +234,12 @@ final class NewTrackerViewController: UIViewController {
     
     @objc private func  makeButtonTapped() {
         let newTracker = Tracker.newTracker(name: name, emoji: emoji, color: color, timeTable: timeTable)
-        let trackerCategory = TrackerCategory(categoryName: categoryName, trackers: [newTracker])
+        //let trackerCategory = TrackerCategory(categoryName: categoryName, trackers: [newTracker])
         
-        makeTracker?(trackerCategory)
+        makeTracker?(newTracker, categoryName)
         name = ""
+        emoji = ""
+        color = ""
         timeTable = []
         dismiss(animated: true)
     }
@@ -236,11 +280,10 @@ extension NewTrackerViewController: UITextFieldDelegate {
 // MARK: UITableViewDelegate, UITableViewDataSource
 
 extension NewTrackerViewController: UITableViewDelegate, UITableViewDataSource {
-   
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier)
-        
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: tableViewCellIdentifier)
         let item = items[indexPath.row]
         cell.backgroundColor = UIColor(resource: .ypBackground)
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
@@ -249,9 +292,9 @@ extension NewTrackerViewController: UITableViewDelegate, UITableViewDataSource {
         cell.detailTextLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         cell.detailTextLabel?.text = item.subtitle ?? ""
         cell.accessoryType = .disclosureIndicator
+        
         return cell
     }
-    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 2
@@ -260,7 +303,6 @@ extension NewTrackerViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
-    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
@@ -271,12 +313,119 @@ extension NewTrackerViewController: UITableViewDelegate, UITableViewDataSource {
             items[indexPath.row].subtitle = categoryName
             self.makeButtonIsEnabled()
             tableView.reloadRows(at: [indexPath], with: .none)
-            
         }
-        
     }
-    
 }
 
+extension NewTrackerViewController: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return collectionViewDataSource.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return collectionViewDataSource[section].cellData.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NewTrackerCollectionViewCell.cellIdentifier, for: indexPath) as? NewTrackerCollectionViewCell else {
+            fatalError("Невозможно создать ячейку типа NewTrackerCollectionViewCell")
+        }
+        cell.titleLabel.text = ""
+        cell.titleLabel.layer.cornerRadius = 8
+        cell.titleLabel.layer.masksToBounds = true
+        cell.titleLabel.textAlignment = .center
+        cell.titleLabel.backgroundColor = .clear
+        cell.activeImageView.isHidden = true
+        cell.backgroundColor = .clear
+        
+        let section = indexPath.section
+        switch section {
+        case 0:
+            if indexPath == selectedEmojiIndexPath {
+                print(indexPath)
+                cell.backgroundColor = UIColor(resource: .ypLightGray)
+            }
+            let text = collectionViewDataSource[section].cellData[indexPath.item]
+            cell.titleLabel.text = text
+            cell.layer.cornerRadius = 16
+           
+        case 1:
+            let colorName = collectionViewDataSource[section].cellData[indexPath.item]
+            let color = UIColor(named: colorName) ?? .clear
+            if indexPath == selectedColorIndexPath {
+                cell.setCompleted(color)
+            }
+           
+            cell.titleLabel.backgroundColor = color
+            cell.layer.cornerRadius = 11.0
+        default:
+            break
+        }
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView{
+        
+        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: NewTrackerCollectionSectionHeader.headerIdentifier, for: indexPath) as? NewTrackerCollectionSectionHeader else {
+            fatalError("Невозможно создать хедер")
+        }
+        let text = collectionViewDataSource[indexPath.section].name
+        view.titleLabel.text = text
+        
+        return view
+    }
+}
 
+extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        let width = collectionView.bounds.width
+        let height: CGFloat
+        if section == 0 {
+            height = 50
+        } else {
+            height = 34
+        }
+        return CGSize(width: width, height: height)
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let calculatedWidth = (collectionView.bounds.width - 32) / 6
+        let maxWidth: CGFloat = 52
+        let width = min(calculatedWidth, maxWidth)
+        let height = width
+        return CGSize(width: width, height: height)
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets{
+        return UIEdgeInsets(top: 24, left: 16, bottom: 24, right: 16)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let section = indexPath.section
+        switch section {
+        case 0:
+            emoji = collectionViewDataSource[section].cellData[indexPath.item]
+            selectedEmojiIndexPath = indexPath
+            self.makeButtonIsEnabled()
+            collectionView.reloadData()
+            
+        case 1:
+            color = collectionViewDataSource[section].cellData[indexPath.item]
+            selectedColorIndexPath = indexPath
+            self.makeButtonIsEnabled()
+            collectionView.reloadData()
+            
+        default:
+            break
+        }
+    }
+}
+    
 

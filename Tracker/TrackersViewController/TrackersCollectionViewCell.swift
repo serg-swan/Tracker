@@ -6,30 +6,31 @@
 //
 
 import UIKit
-protocol TrackerCollectionViewCellDelegate: AnyObject {
-    func updateCompletedTrackers(_ cell: TrackerCollectionViewCell)
+protocol TrackersCollectionViewCellDelegate: AnyObject {
+    func updateCompletedTrackers(_ cell: TrackersCollectionViewCell)
 }
 
-final class TrackerCollectionViewCell: UICollectionViewCell {
-    var trackerLabel = UILabel()
-    var emojiLabel = UILabel()
-    var nameLabel = UILabel()
-    private let managementLabel = UILabel()
-    var dayCountLabel = UILabel()
+final class TrackersCollectionViewCell: UICollectionViewCell {
+  static let cellIdentifier = "TrackerCollectionViewCell"
+    lazy var trackerLabel = UILabel()
+    lazy var emojiLabel = UILabel()
+    lazy var nameLabel = UILabel()
+    private lazy var managementLabel = UILabel()
+    lazy var dayCountLabel = UILabel()
     var dayCount: Int = 0
     let button = UIButton()
-    weak var delegate : TrackerCollectionViewCellDelegate?
+    weak var delegate : TrackersCollectionViewCellDelegate?
     
     override init (frame: CGRect) {
         super.init(frame: frame)
         setupUI()
         setupConstraints()
-       
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     private func addSubviews() {
         contentView.addSubview(trackerLabel)
         contentView.addSubview(managementLabel)

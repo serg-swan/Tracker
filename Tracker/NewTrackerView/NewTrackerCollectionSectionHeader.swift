@@ -1,14 +1,15 @@
 //
-//  TrackersCollectionSectionHeader.swift
+//  NewTrackerCollectionSectionHeader.swift
 //  Tracker
 //
-//  Created by Сергей Лебедь on 03.08.2025.
+//  Created by Сергей Лебедь on 27.08.2025.
 //
 
 import UIKit
 
-final class TrackersCollectionSectionHeader: UICollectionReusableView {
-    static let headerIdentifier = "TrackersCollectionSectionHeader"
+final class NewTrackerCollectionSectionHeader: UICollectionReusableView {
+    
+    static let headerIdentifier = "NewTrackerCollectionSectionHeader"
     let titleLabel = UILabel()
     
     override init(frame: CGRect) {
@@ -21,13 +22,12 @@ final class TrackersCollectionSectionHeader: UICollectionReusableView {
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 28),
             titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -28),
-            titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12)
+            titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
 }

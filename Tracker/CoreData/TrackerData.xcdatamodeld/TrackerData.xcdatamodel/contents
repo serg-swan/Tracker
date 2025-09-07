@@ -7,7 +7,7 @@
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="timeTable" attributeType="Transformable" valueTransformerName="DaysValueTransformer"/>
         <relationship name="trackerCategory" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCoreDataCategory" inverseName="trackers" inverseEntity="TrackerCoreDataCategory"/>
-        <relationship name="trackerRecord" toMany="YES" deletionRule="Nullify" destinationEntity="TrackerCoreDataRecord" inverseName="trackerId" inverseEntity="TrackerCoreDataRecord"/>
+        <relationship name="trackerRecord" toMany="YES" deletionRule="Nullify" destinationEntity="TrackerCoreDataRecord" inverseName="tracker" inverseEntity="TrackerCoreDataRecord"/>
     </entity>
     <entity name="TrackerCoreDataCategory" representedClassName="TrackerCoreDataCategory" syncable="YES" codeGenerationType="class">
         <attribute name="categoryName" attributeType="String"/>
@@ -15,6 +15,6 @@
     </entity>
     <entity name="TrackerCoreDataRecord" representedClassName="TrackerCoreDataRecord" syncable="YES" codeGenerationType="class">
         <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <relationship name="trackerId" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCoreData" inverseName="trackerRecord" inverseEntity="TrackerCoreData"/>
+        <relationship name="tracker" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCoreData" inverseName="trackerRecord" inverseEntity="TrackerCoreData"/>
     </entity>
 </model>
