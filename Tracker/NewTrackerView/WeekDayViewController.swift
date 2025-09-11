@@ -23,33 +23,33 @@ final class WeekDayViewController: UIViewController {
             .font: UIFont.systemFont(ofSize: 16, weight: .medium)
         ]
         
-        setupTableViewUI()
         setupReturnButtonUI()
-        
+        setupTableViewUI()
+       
     }
     
     private func setupTableViewUI() {
-       
         tableView.estimatedSectionHeaderHeight = 0
         tableView.estimatedSectionFooterHeight = 0
         tableView.sectionHeaderHeight = 0
         tableView.sectionFooterHeight = 0
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+
         tableView.delegate = self
         tableView.dataSource = self
         tableView.layer.cornerRadius = 16
         tableView.clipsToBounds = true
-        tableView.isScrollEnabled = false
+        tableView.isScrollEnabled = true
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
-        let cellHeight: CGFloat = 75
-        let totalHeight: CGFloat = CGFloat(days.count) * cellHeight
+      
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: totalHeight)
+            tableView.bottomAnchor.constraint(equalTo: returnButton.topAnchor, constant: -24)
+         
         ])
     }
     
@@ -86,7 +86,6 @@ final class WeekDayViewController: UIViewController {
           returnButton.isEnabled = !selectedDays.isEmpty
       }
 
-    
     @objc private func returnButtonTapped(){
         onDaysSelected?(selectedDays)
         selectedDays.removeAll()
@@ -100,7 +99,15 @@ extension WeekDayViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = UITableViewCell(style: .default, reuseIdentifier: cellIdentifier)
-        
+        cell.layer.cornerRadius = 16
+        cell.layer.masksToBounds = true
+        cell.layer.maskedCorners = []
+        if indexPath.row == 0 {
+            cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        }
+        if indexPath.row == 6 {
+            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        }
         cell.backgroundColor = UIColor(resource: .ypBackground)
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         cell.textLabel?.text = days[indexPath.row]
