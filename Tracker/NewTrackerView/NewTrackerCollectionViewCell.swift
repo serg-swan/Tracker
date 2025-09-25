@@ -40,7 +40,6 @@ final class NewTrackerCollectionViewCell: UICollectionViewCell {
             titleLabel.widthAnchor.constraint(equalToConstant: 40),
             titleLabel.heightAnchor.constraint(equalToConstant: 40)
            
-            
         ])
     }
     func  setCompleted(_ color: UIColor) {

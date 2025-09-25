@@ -8,7 +8,7 @@
 import UIKit
 
 final class TrackersViewController: UIViewController {
-    
+
     private var trackersDataProvider: TrackersDataProviderProtocol?
    init(trackersDataProvider: TrackersDataProviderProtocol = TrackersDataProvider()) {
         self.trackersDataProvider = trackersDataProvider
@@ -20,19 +20,14 @@ final class TrackersViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
     // MARK: Private Properties
     
-  
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-    
     private let textLabel = UILabel()
     private let searchController = UISearchController()
     private let placeholderView =  UIView()
-   
     private var currentSelectedDate = Calendar.current.startOfDay(for: Date())
  
-    
     //MARK: Lifecycle
     
     override func viewDidLoad() {
@@ -48,7 +43,6 @@ final class TrackersViewController: UIViewController {
         setupPlaceholderViewUI()
         setupConstraints()
     }
-    
     
     //MARK: Private Methods
     
@@ -173,25 +167,20 @@ final class TrackersViewController: UIViewController {
     }
     
     private func trackerCompleted(tracker: Tracker, category: String) {
-  
       try?  trackersDataProvider?.fetchOrCreateCategory(tracker: tracker, category: category)
-
   let currentWeekDay = currentSelectedDate.weekDay()
         updateVisibleTrackers(for: currentWeekDay)
-        
     }
+    
   private  func hasRecordForDate(tracker: TrackerCoreData) -> Bool {
         guard let records = tracker.trackerRecord as? Set<TrackerCoreDataRecord> else {
               return false
           }
-          
           return records.contains { record in
               guard let recordDate = record.date else { return false }
               return recordDate == currentSelectedDate
           }
         }
-    
-    
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker)  {
         let selectedDate = sender.date
@@ -307,7 +296,6 @@ extension TrackersViewController: UICollectionViewDataSource {
 }
 
 extension TrackersViewController: TrackersDataProviderDelegate {
-   
     func didUpdateTrackersCollection() {
         collectionView.reloadData()
     }

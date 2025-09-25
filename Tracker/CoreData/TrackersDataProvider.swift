@@ -9,8 +9,7 @@ import Foundation
 import CoreData
 
 protocol TrackersDataProviderDelegate: AnyObject {
-    func  didUpdateTrackersCollection()
-  
+    func didUpdateTrackersCollection()
 }
 
 protocol TrackersDataProviderProtocol {
@@ -28,18 +27,22 @@ final class TrackersDataProvider: NSObject {
     
     weak var delegate: TrackersDataProviderDelegate?
     
-    private var insertedIndexPaths = [IndexPath]()
-    private var deletedIndexPaths = [IndexPath]()
-    private var updatedIndexPaths = [IndexPath]()
     
+    var onTrackersDidChange: (() -> Void)?
+    private var weekDay: WeekDay? = nil
     private let context: NSManagedObjectContext
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
-    init(context: NSManagedObjectContext = CoreDataManager.shared.context) {
+    init(context: NSManagedObjectContext = CoreDataManager.shared.context,
+         trackerCategoryStore: TrackerCategoryStore = CoreDataManager.shared.trackerCategoryStore,
+         trackerRecordStore: TrackerRecordStore = CoreDataManager.shared.trackerRecordStore) {
         self.context = context
-        self.trackerCategoryStore = TrackerCategoryStore(context: context)
-        self.trackerRecordStore = TrackerRecordStore(context: context)
-        
+        self.trackerCategoryStore = trackerCategoryStore
+        self.trackerRecordStore = trackerRecordStore
+        super .init()
+        trackerCategoryStore.updatePredicate = { [weak self] in
+            self?.updateFilter(for: self?.weekDay ?? .friday)
+        }
     }
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         
@@ -54,14 +57,15 @@ final class TrackersDataProvider: NSObject {
                                                                   cacheName: nil)
         
         fetchedResultsController.delegate = self
+        try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
+        
 }
 
 extension TrackersDataProvider: TrackersDataProviderProtocol {
     var numberOfSections: Int {
         fetchedResultsController.sections?.count ?? 0
-        
     }
     
     func numberOfRowsInSection(_ section: Int) -> Int {
@@ -77,8 +81,8 @@ extension TrackersDataProvider: TrackersDataProviderProtocol {
         return category?.name
     }
     
-    
     func updateFilter(for day: WeekDay) {
+        weekDay = day
         fetchedResultsController.fetchRequest.predicate = NSPredicate(
             format: "timeTable CONTAINS %@",
             day.rawValue
@@ -97,11 +101,13 @@ extension TrackersDataProvider: TrackersDataProviderProtocol {
         try?  trackerRecordStore.deleteOrAddTrackerRecord(tracker: tracker, date: date)
         fetchedResultsController.delegate = self
     }
-    
 }
 
 extension TrackersDataProvider: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        
+        delegate?.didUpdateTrackersCollection()
     }
+    
 }
+
+

@@ -6,7 +6,7 @@
 //
 
 
-import UIKit
+import UIKit 
 final class WeekDayViewController: UIViewController {
     private let tableView = UITableView(frame: .zero, style: .plain)
     private let returnButton = UIButton()
@@ -99,6 +99,7 @@ extension WeekDayViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = UITableViewCell(style: .default, reuseIdentifier: cellIdentifier)
+        cell.selectionStyle = .none
         cell.layer.cornerRadius = 16
         cell.layer.masksToBounds = true
         cell.layer.maskedCorners = []
@@ -129,13 +130,6 @@ extension WeekDayViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
-    
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        
-    }
-    
     
 }
 extension Collection {

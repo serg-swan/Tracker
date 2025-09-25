@@ -18,11 +18,11 @@ struct CollectionViewData {
 
 final class NewTrackerViewController: UIViewController {
     
-    var makeTracker: ((Tracker, String) -> Void)? // этот метод уладить и соханять в кордвту
+    var makeTracker: ((Tracker, String) -> Void)?
     
     // MARK: Private Properties
     
-    private var categoryName = "Работа"
+    private var categoryName = ""
     private var name: String = ""
     private var emoji: String = ""
     private var color: String = ""
@@ -37,23 +37,16 @@ final class NewTrackerViewController: UIViewController {
         "Color7", "Color8", "Color9", "Color10", "Color11", "Color12",
         "Color13", "Color14", "Color15", "Color16", "Color17", "Color18"
     ]
-    
-    
     private lazy var collectionViewDataSource: [CollectionViewData] = [
         CollectionViewData(name: "Emoji", cellData: emojiArray),
         CollectionViewData(name: "Цвет", cellData: colorArray)
     ]
-    
-    
     private var timeTable: [WeekDay] = []
-    
     private lazy var textField = UITextField()
     private lazy var tableView = UITableView(frame: .zero, style: .plain)
     private lazy var collectionView: UICollectionView = .init(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private lazy var makeButton = UIButton()
     private lazy var cancelButton = UIButton()
-    
-    
     private let tableViewCellIdentifier = "cell"
     private var items = [
         TableviewCellData(title: "Категория", subtitle: nil),
@@ -119,6 +112,7 @@ final class NewTrackerViewController: UIViewController {
         tableView.layer.cornerRadius = 16
         tableView.clipsToBounds = true
         tableView.isScrollEnabled = false
+        tableView.backgroundColor = UIColor(resource: .ypBackground)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: tableViewCellIdentifier)
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -208,6 +202,28 @@ final class NewTrackerViewController: UIViewController {
         present(navVC, animated: true)
     }
     
+    private func showCategorySelector(for indexPath: IndexPath) {
+        let categoryVC = CategoryViewController()
+        let model = TrackerCategoryDataProvider()
+        let viewModel = CategoryViewModel(for: model)
+        viewModel.categorySelectUpdate = { [weak self] selectedCategory in
+            self?.categorySelection(selectedCategory, for: indexPath)
+        }
+        categoryVC.initialize(viewModel: viewModel)
+        viewModel.categorySelect = categoryName
+     
+        let navVC = UINavigationController(rootViewController: categoryVC)
+        present(navVC, animated: true)
+    }
+    
+    private func categorySelection(_ category: String, for indexPath: IndexPath) {
+        categoryName = category
+        items[indexPath.row].subtitle = category
+        self.tableView.reloadRows(at: [indexPath], with: .none)
+        self.makeButtonIsEnabled()
+    }
+    
+    
     private func handleDaySelection(_ days: [WeekDay], for indexPath: IndexPath) {
         timeTable = days
         updateCell(at: indexPath, with: days)
@@ -234,19 +250,11 @@ final class NewTrackerViewController: UIViewController {
     
     @objc private func  makeButtonTapped() {
         let newTracker = Tracker.newTracker(name: name, emoji: emoji, color: color, timeTable: timeTable)
-        //let trackerCategory = TrackerCategory(categoryName: categoryName, trackers: [newTracker])
-        
         makeTracker?(newTracker, categoryName)
-        name = ""
-        emoji = ""
-        color = ""
-        timeTable = []
         dismiss(animated: true)
     }
     
     @objc private func  cancelButtonTapped() {
-        name = ""
-        timeTable = []
         dismiss(animated: true)
         
     }
@@ -309,10 +317,8 @@ extension NewTrackerViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.row == 1 {
             showWeekDaySelector(for: indexPath)
         } else {
+            showCategorySelector(for: indexPath)
             
-            items[indexPath.row].subtitle = categoryName
-            self.makeButtonIsEnabled()
-            tableView.reloadRows(at: [indexPath], with: .none)
         }
     }
 }
@@ -348,14 +354,14 @@ extension NewTrackerViewController: UICollectionViewDataSource {
             let text = collectionViewDataSource[section].cellData[indexPath.item]
             cell.titleLabel.text = text
             cell.layer.cornerRadius = 16
-           
+            
         case 1:
             let colorName = collectionViewDataSource[section].cellData[indexPath.item]
             let color = UIColor(named: colorName) ?? .clear
             if indexPath == selectedColorIndexPath {
                 cell.setCompleted(color)
             }
-           
+            
             cell.titleLabel.backgroundColor = color
             cell.layer.cornerRadius = 11.0
         default:
@@ -427,5 +433,5 @@ extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
         }
     }
 }
-    
+
 
