@@ -8,12 +8,15 @@
 import UIKit
 
 final class CategoryViewController: UIViewController {
+    
+    //MARK: - Private properties
     private lazy var tableView = UITableView(frame: .zero, style: .plain)
     private lazy var newCategoryButton = UIButton()
     private var selectedCategories: String = ""
     private let placeholderView =  UIView()
     private var viewModel: CategoryViewModel?
-        
+    
+    //MARK: Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(resource: .ypWhite)
@@ -30,7 +33,6 @@ final class CategoryViewController: UIViewController {
     func initialize(viewModel: CategoryViewModel) {
         self.viewModel = viewModel
         bind()
-       
     }
     private func bind() {
         guard let viewModel = viewModel else { return }
@@ -128,7 +130,7 @@ final class CategoryViewController: UIViewController {
             newCategoryButton.heightAnchor.constraint(equalToConstant: 60),
             ])
     }
-    
+    //MARK: - Action
     @objc private func newCategoryButtonTapped(){
     
         let nevCategoryVC = NewCategoryViewController()
@@ -139,7 +141,7 @@ final class CategoryViewController: UIViewController {
         present(navVC, animated: true)
     }
 }
-
+//MARK: - UITableViewDelegate
 extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: NewCategoryTableViewCell.cellIdentifier, for: indexPath) as? NewCategoryTableViewCell else {
@@ -147,7 +149,6 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
         }
        guard let viewModel else { return UITableViewCell() }
         let count = viewModel.fetchedObjects()
-        cell.separator.isHidden = false 
         cell.layer.maskedCorners = []
         if indexPath.row == 0 {
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -156,7 +157,6 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
             cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         }
         cell.titleLabel.text = viewModel.object(at: indexPath)
-       
         if cell.titleLabel.text == viewModel.categorySelect {
             cell.accessoryType = .checkmark
             print(selectedCategories)
@@ -189,7 +189,6 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                    self.dismiss(animated: true)
                }
-       
     }
    
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
@@ -233,13 +232,3 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-
-
-
-
-
-
-    
-   
-
-

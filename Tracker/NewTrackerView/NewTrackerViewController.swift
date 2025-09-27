@@ -112,7 +112,6 @@ final class NewTrackerViewController: UIViewController {
         tableView.layer.cornerRadius = 16
         tableView.clipsToBounds = true
         tableView.isScrollEnabled = false
-        tableView.backgroundColor = UIColor(resource: .ypBackground)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: tableViewCellIdentifier)
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -244,6 +243,7 @@ final class NewTrackerViewController: UIViewController {
         }
     }
     
+    //MARK: - Action
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
@@ -336,14 +336,7 @@ extension NewTrackerViewController: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NewTrackerCollectionViewCell.cellIdentifier, for: indexPath) as? NewTrackerCollectionViewCell else {
             fatalError("Невозможно создать ячейку типа NewTrackerCollectionViewCell")
         }
-        cell.titleLabel.text = ""
-        cell.titleLabel.layer.cornerRadius = 8
-        cell.titleLabel.layer.masksToBounds = true
-        cell.titleLabel.textAlignment = .center
-        cell.titleLabel.backgroundColor = .clear
-        cell.activeImageView.isHidden = true
-        cell.backgroundColor = .clear
-        
+      
         let section = indexPath.section
         switch section {
         case 0:

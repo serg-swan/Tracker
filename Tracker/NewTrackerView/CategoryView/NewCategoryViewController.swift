@@ -7,20 +7,18 @@
 
 import UIKit
 final class NewCategoryViewController: UIViewController {
+    
+    // MARK: Private Properties
     private lazy var textField = UITextField()
     private let returnButton = UIButton()
     private var viewModel: CategoryViewModel?
     
+    //MARK: Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(resource: .ypWhite)
-        title = "Новая категория"
-        navigationController?.navigationBar.titleTextAttributes = [
-            .font: UIFont.systemFont(ofSize: 16, weight: .medium)
-        ]
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
+        setupView()
+        setupNavigationBar()
+        setupGesture()
         setupTextFieldUI()
         setupReturnButtonUI()
     }
@@ -28,6 +26,7 @@ final class NewCategoryViewController: UIViewController {
         self.viewModel = viewModel
     }
     
+    //MARK: - Private methods
     private func makeButtonIsEnabled() {
         guard let viewModel else { return }
         if !viewModel.createNameCategory.isEmpty {
@@ -37,6 +36,26 @@ final class NewCategoryViewController: UIViewController {
             }
         }
     }
+    
+    private func setupView() {
+          view.backgroundColor = UIColor(resource: .ypWhite)
+      }
+      
+      private func setupNavigationBar() {
+          title = "Новая категория"
+          navigationController?.navigationBar.titleTextAttributes = [
+              .font: UIFont.systemFont(ofSize: 16, weight: .medium)
+          ]
+      }
+      
+      private func setupGesture() {
+          let tapGesture = UITapGestureRecognizer(
+              target: self,
+              action: #selector(dismissKeyboard)
+          )
+          tapGesture.cancelsTouchesInView = false
+          view.addGestureRecognizer(tapGesture)
+      }
     
     private func setupTextFieldUI() {
         textField.isEnabled = true
@@ -81,6 +100,7 @@ final class NewCategoryViewController: UIViewController {
             ])
     }
     
+    //MARK: - Action
     @objc private func returnButtonTapped() {
         guard let viewModel else { return }
         let name = viewModel.createNameCategory
@@ -93,6 +113,7 @@ final class NewCategoryViewController: UIViewController {
     
 }
 
+//MARK: - UITextFieldDelegate
 extension NewCategoryViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()

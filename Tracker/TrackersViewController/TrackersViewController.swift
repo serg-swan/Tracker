@@ -12,7 +12,6 @@ final class TrackersViewController: UIViewController {
     private var trackersDataProvider: TrackersDataProviderProtocol?
    init(trackersDataProvider: TrackersDataProviderProtocol = TrackersDataProvider()) {
         self.trackersDataProvider = trackersDataProvider
-      
        super.init(nibName: nil, bundle: nil)
     }
     
@@ -21,7 +20,6 @@ final class TrackersViewController: UIViewController {
     }
     
     // MARK: Private Properties
-    
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let textLabel = UILabel()
     private let searchController = UISearchController()
@@ -29,7 +27,6 @@ final class TrackersViewController: UIViewController {
     private var currentSelectedDate = Calendar.current.startOfDay(for: Date())
  
     //MARK: Lifecycle
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         trackersDataProvider?.delegate = self
@@ -45,7 +42,6 @@ final class TrackersViewController: UIViewController {
     }
     
     //MARK: Private Methods
-    
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: searchController.searchBar.bottomAnchor),
@@ -181,7 +177,7 @@ final class TrackersViewController: UIViewController {
               return recordDate == currentSelectedDate
           }
         }
-    
+    //MARK: - Actions
     @objc private func datePickerValueChanged(_ sender: UIDatePicker)  {
         let selectedDate = sender.date
         let calendar = Calendar.current
@@ -220,6 +216,7 @@ extension TrackersViewController: TrackersCollectionViewCellDelegate {
     }
 }
 
+//MARK: - UISearchResultsUpdating
 extension TrackersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         
@@ -294,7 +291,7 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
 
 }
-
+//MARK: - TrackersDataProviderDelegate
 extension TrackersViewController: TrackersDataProviderDelegate {
     func didUpdateTrackersCollection() {
         collectionView.reloadData()

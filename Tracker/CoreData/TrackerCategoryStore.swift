@@ -58,9 +58,7 @@ public final class TrackerCategoryStore {
         category.categoryName = newName
         CoreDataManager.shared.saveContext()
         updatePredicate?()
-        
     }
     
 }
-
 

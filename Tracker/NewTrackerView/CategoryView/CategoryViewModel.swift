@@ -29,7 +29,6 @@ final class CategoryViewModel {
     private func bind() {
         model.onCategoriesDidChange = { [weak self]  in
             self?.categoriesUpdate?()
-           
         }
     }
     
@@ -52,5 +51,4 @@ final class CategoryViewModel {
     func updateCategory(indexPath: IndexPath, newName: String) throws {
         try? model.updateCategory(indexPath: indexPath, newName: newName)
     }
-    
 }

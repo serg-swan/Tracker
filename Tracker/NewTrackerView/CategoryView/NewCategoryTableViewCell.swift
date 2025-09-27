@@ -15,9 +15,7 @@ final class NewCategoryTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     
-        addSubview(titleLabel)
-        titleLabel.font = UIFont.systemFont(ofSize: 19, weight: .bold)
-        titleLabel.text = ""
+        contentView.addSubview(titleLabel)
         titleLabel.textColor = UIColor(resource: .ypBlack)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -29,7 +27,7 @@ final class NewCategoryTableViewCell: UITableViewCell {
 
         separator.backgroundColor = UIColor(resource: .ypGray)
         separator.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(separator)
+        contentView.addSubview(separator)
         NSLayoutConstraint.activate([
             separator.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             separator.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
@@ -46,5 +44,10 @@ final class NewCategoryTableViewCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+    override func prepareForReuse() {
+          super.prepareForReuse()
+          titleLabel.text = nil
+          separator.isHidden = false
+          accessoryType = .none
+      }
 }

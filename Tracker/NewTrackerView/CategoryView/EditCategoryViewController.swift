@@ -14,14 +14,9 @@ final class EditCategoryViewController: UIViewController {
     private lazy var indexPath: IndexPath = .init(row: 0, section:  0)
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(resource: .ypWhite)
-        title = "Редактирование категории"
-        navigationController?.navigationBar.titleTextAttributes = [
-            .font: UIFont.systemFont(ofSize: 16, weight: .medium)
-        ]
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
+        setupView()
+        setupNavigationBar()
+        setupGesture()
         setupTextFieldUI()
         setupReturnButtonUI()
     }
@@ -34,20 +29,36 @@ final class EditCategoryViewController: UIViewController {
        guard let viewModel = viewModel else { return }
        viewModel.indexPath = { [weak self] indexPath in
            self?.indexPath = indexPath
-           
        }
     }
-    
+    //MARK: - Private methods
     private func makeButtonIsEnabled() {
         guard let viewModel else { return }
-      
         if !viewModel.newNameCategory.isEmpty {
             returnButton.isEnabled = true
-            DispatchQueue.main.async {
-                self.returnButton.backgroundColor = UIColor(resource: .ypBlack)
-            }
+            returnButton.backgroundColor = UIColor(resource: .ypBlack)
+            
         }
     }
+    private func setupView() {
+          view.backgroundColor = UIColor(resource: .ypWhite)
+      }
+      
+      private func setupNavigationBar() {
+          title = "Редактирование категории"
+          navigationController?.navigationBar.titleTextAttributes = [
+              .font: UIFont.systemFont(ofSize: 16, weight: .medium)
+          ]
+      }
+      
+      private func setupGesture() {
+          let tapGesture = UITapGestureRecognizer(
+              target: self,
+              action: #selector(dismissKeyboard)
+          )
+          tapGesture.cancelsTouchesInView = false
+          view.addGestureRecognizer(tapGesture)
+      }
     
     private func setupTextFieldUI() {
         textField.isEnabled = true
@@ -92,6 +103,7 @@ final class EditCategoryViewController: UIViewController {
             ])
     }
     
+    //MARK: - Action
     @objc private func returnButtonTapped() {
         guard let viewModel else { return }
         let newName = viewModel.newNameCategory
@@ -104,7 +116,7 @@ final class EditCategoryViewController: UIViewController {
     }
     
 }
-
+// MARK: - UITextFieldDelegate
 extension EditCategoryViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
