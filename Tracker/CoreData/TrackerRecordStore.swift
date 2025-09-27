@@ -23,20 +23,24 @@ public final class TrackerRecordStore {
     }
     
     func deleteOrAddTrackerRecord(tracker: TrackerCoreData, date: Date) throws  {
+        
         let fetchRequest: NSFetchRequest<TrackerCoreDataRecord> = TrackerCoreDataRecord.fetchRequest()
         fetchRequest.predicate = NSPredicate(
             format: "date == %@ AND tracker == %@",
             date as NSDate,
             tracker
         )
-        guard let record = try context.fetch(fetchRequest).first else {
-            return      try addTrackerRecord(tracker: tracker, date: date)
+        
+        if let existingRecord = try context.fetch(fetchRequest).first {
+            context.delete(existingRecord)
+            CoreDataManager.shared.saveContext()
+            print("Запись удалена: \(date)")
+        } else {
+            
+            try addTrackerRecord(tracker: tracker, date: date)
+            print("Запись добавлена: \(date)")
         }
-        record.tracker = nil
-        context.delete(record)
-        CoreDataManager.shared.saveContext()
+        
     }
     
-    
 }
-

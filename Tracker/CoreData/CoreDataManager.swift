@@ -11,6 +11,16 @@ import CoreData
 final class CoreDataManager {
     static let shared = CoreDataManager()
     private init() {}
+   
+      lazy var trackerCategoryStore: TrackerCategoryStore = {
+          TrackerCategoryStore(context: self.context)
+      }()
+    lazy var trackerRecordStore: TrackerRecordStore = {
+           TrackerRecordStore(context: self.context)
+       }()
+    lazy var trackerStore: TrackerStore = {
+        TrackerStore(context: self.context)
+    }()
     
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "TrackerData")
@@ -32,6 +42,8 @@ final class CoreDataManager {
                 try context.save()
             } catch {
                 context.rollback()
+                print("❌ Ошибка сохранения контекста: \(error)")
+                          print("❌ Подробности: \((error as NSError).userInfo)")
             }
         }
     }

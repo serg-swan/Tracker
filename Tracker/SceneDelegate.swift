@@ -15,7 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
        
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        let onboardViewController = OnboardViewController()
+        let onboardViewController = OnboardViewController.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
         let tabBarController = TabBarController()
         if UserDefaults.isFirstLaunch {
            UserDefaults.isFirstLaunch = false

@@ -20,12 +20,15 @@ final class NewTrackerCollectionViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+  
     private func setupUI() {
         activeImageView.isHidden = true
         titleLabel.backgroundColor = .clear
         titleLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
         titleLabel.text = ""
+        titleLabel.layer.masksToBounds = true
+        titleLabel.textAlignment = .center
+        titleLabel.layer.cornerRadius = 8
         contentView.addSubview(activeImageView)
         contentView.addSubview(titleLabel)
         activeImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -40,7 +43,6 @@ final class NewTrackerCollectionViewCell: UICollectionViewCell {
             titleLabel.widthAnchor.constraint(equalToConstant: 40),
             titleLabel.heightAnchor.constraint(equalToConstant: 40)
            
-            
         ])
     }
     func  setCompleted(_ color: UIColor) {
@@ -48,6 +50,14 @@ final class NewTrackerCollectionViewCell: UICollectionViewCell {
         let coloredImage = activeImage.withTintColor(color, renderingMode: .alwaysOriginal)
         activeImageView.image = coloredImage
         activeImageView.isHidden = false
+    }
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        titleLabel.text = ""
+        titleLabel.layer.cornerRadius = 8
+        titleLabel.backgroundColor = .clear
+        activeImageView.isHidden = true
+        backgroundColor = .clear
     }
 }
 

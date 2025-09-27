@@ -8,11 +8,12 @@
 import Foundation
 import CoreData
 
+// MARK: - Delegate
 protocol TrackersDataProviderDelegate: AnyObject {
-    func  didUpdateTrackersCollection()
-  
+    func didUpdateTrackersCollection()
 }
 
+// MARK: - Protocol
 protocol TrackersDataProviderProtocol {
     var delegate: TrackersDataProviderDelegate? { get set }
     var numberOfSections: Int { get }
@@ -24,23 +25,33 @@ protocol TrackersDataProviderProtocol {
     func addOrDeleteTrackerRecord(tracker: TrackerCoreData, date: Date) throws
 }
 
+// MARK: - TrackersDataProvider
 final class TrackersDataProvider: NSObject {
     
+    // MARK: - Public properties
     weak var delegate: TrackersDataProviderDelegate?
+    var onTrackersDidChange: (() -> Void)?
     
-    private var insertedIndexPaths = [IndexPath]()
-    private var deletedIndexPaths = [IndexPath]()
-    private var updatedIndexPaths = [IndexPath]()
-    
+    // MARK: - Private properties
+    private var weekDay: WeekDay? = nil
     private let context: NSManagedObjectContext
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
-    init(context: NSManagedObjectContext = CoreDataManager.shared.context) {
+    
+    // MARK: - Init
+    init(context: NSManagedObjectContext = CoreDataManager.shared.context,
+         trackerCategoryStore: TrackerCategoryStore = CoreDataManager.shared.trackerCategoryStore,
+         trackerRecordStore: TrackerRecordStore = CoreDataManager.shared.trackerRecordStore) {
         self.context = context
-        self.trackerCategoryStore = TrackerCategoryStore(context: context)
-        self.trackerRecordStore = TrackerRecordStore(context: context)
-        
+        self.trackerCategoryStore = trackerCategoryStore
+        self.trackerRecordStore = trackerRecordStore
+        super .init()
+        trackerCategoryStore.updatePredicate = { [weak self] in
+            self?.updateFilter(for: self?.weekDay ?? .friday)
+        }
     }
+    
+    // MARK: - FetchedResultsController
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
@@ -52,16 +63,16 @@ final class TrackersDataProvider: NSObject {
                                                                   managedObjectContext: context,
                                                                   sectionNameKeyPath: "trackerCategory.categoryName",
                                                                   cacheName: nil)
-        
         fetchedResultsController.delegate = self
+        try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
 }
 
+// MARK: - TrackersDataProviderProtocol
 extension TrackersDataProvider: TrackersDataProviderProtocol {
     var numberOfSections: Int {
         fetchedResultsController.sections?.count ?? 0
-        
     }
     
     func numberOfRowsInSection(_ section: Int) -> Int {
@@ -77,8 +88,8 @@ extension TrackersDataProvider: TrackersDataProviderProtocol {
         return category?.name
     }
     
-    
     func updateFilter(for day: WeekDay) {
+        weekDay = day
         fetchedResultsController.fetchRequest.predicate = NSPredicate(
             format: "timeTable CONTAINS %@",
             day.rawValue
@@ -89,19 +100,31 @@ extension TrackersDataProvider: TrackersDataProviderProtocol {
     }
     
     func fetchOrCreateCategory(tracker: Tracker, category: String) throws  {
-        try? trackerCategoryStore.fetchOrCreateCategory(tracker: tracker, category: category)
+         do {
+             try trackerCategoryStore.fetchOrCreateCategory(tracker: tracker, category: category)
+         } catch {
+             print("Failed to fetch or create category: \(error)")
+             throw error
+         }
     }
     
     func addOrDeleteTrackerRecord(tracker: TrackerCoreData, date: Date) throws {
         fetchedResultsController.delegate = nil
-        try?  trackerRecordStore.deleteOrAddTrackerRecord(tracker: tracker, date: date)
-        fetchedResultsController.delegate = self
+        do {
+            try  trackerRecordStore.deleteOrAddTrackerRecord(tracker: tracker, date: date)
+            fetchedResultsController.delegate = self
+        } catch {
+            print("Failed to add or delete tracker record: \(error)")
+            fetchedResultsController.delegate = self
+            throw error
+        }
     }
-    
 }
 
+// MARK: - NSFetchedResultsControllerDelegate
 extension TrackersDataProvider: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        
+        delegate?.didUpdateTrackersCollection()
     }
+
 }
