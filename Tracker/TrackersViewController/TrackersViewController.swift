@@ -177,6 +177,7 @@ final class TrackersViewController: UIViewController {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         placeholderFilterView.backgroundColor = .clear
         placeholderFilterView.translatesAutoresizingMaskIntoConstraints = false
+        placeholderFilterView.isHidden = true
         placeholderFilterView.addSubview(stackView)
         NSLayoutConstraint.activate([
             stackView.centerXAnchor.constraint(equalTo: placeholderFilterView.centerXAnchor),
@@ -200,6 +201,7 @@ final class TrackersViewController: UIViewController {
         filterButton.clipsToBounds = true
         filterButton.setTitleColor(currentFilter.colorButton, for: .normal)
         filterButton.translatesAutoresizingMaskIntoConstraints = false
+        filterButton.isHidden = true
         filterButton.addTarget(self, action: #selector(handleFilterButtonTapped), for: .touchUpInside)
       
     }
@@ -212,12 +214,15 @@ final class TrackersViewController: UIViewController {
             if !hasTrackers {
                 self.placeholderView.isHidden = false
                 self.placeholderFilterView.isHidden = true
+                self.filterButton.isHidden = true
             } else if hasTrackers && !hasVisibleSections {
                 self.placeholderView.isHidden = true
                 self.placeholderFilterView.isHidden = false
+                self.filterButton.isHidden = true
             } else {
                 self.placeholderView.isHidden = true
                 self.placeholderFilterView.isHidden = true
+                self.filterButton.isHidden = false
             }
         }
     }
