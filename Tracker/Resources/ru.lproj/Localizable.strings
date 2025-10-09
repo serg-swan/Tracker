@@ -1,0 +1,16 @@
+/*
+  Localizable.strings
+  Tracker
+
+  Created by Сергей Лебедь on 28.09.2025.
+  */
+
+
+
+
+trackers = "Трекеры";
+statistics = "Статистика";
+filters = "Фильтры";
+day = "День";
+"days_for234" = "Дня";
+days = "Дней";

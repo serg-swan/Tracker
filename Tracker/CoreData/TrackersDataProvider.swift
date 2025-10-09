@@ -20,9 +20,13 @@ protocol TrackersDataProviderProtocol {
     func numberOfRowsInSection(_ section: Int) -> Int
     func trackerObject(at indexPath: IndexPath) -> TrackerCoreData?
     func categoryObject(at indexPath: IndexPath) -> String?
-    func updateFilter(for day: WeekDay)
-    func fetchOrCreateCategory(tracker: Tracker, category: String) throws
+    func updateFilter(selectedWeekDay: WeekDay, currentFilter: TrackerFilter, searchText: String?)
+    func fetchCategory(tracker: Tracker) throws -> TrackerCoreDataCategory?
     func addOrDeleteTrackerRecord(tracker: TrackerCoreData, date: Date) throws
+    func deleteTracker(_ indexPath: IndexPath) throws
+    func editTracker(trackerCoreData: TrackerCoreData, trackerNewData: Tracker)throws
+    func createTracker(tracker: Tracker) throws
+    func trackersStoreNotIsEmpty() -> Bool
 }
 
 // MARK: - TrackersDataProvider
@@ -33,21 +37,28 @@ final class TrackersDataProvider: NSObject {
     var onTrackersDidChange: (() -> Void)?
     
     // MARK: - Private properties
-    private var weekDay: WeekDay? = nil
+    private var currentFilter: TrackerFilter = .all
+    private var weekDay: WeekDay
+    private var searchText: String? = nil
     private let context: NSManagedObjectContext
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
+    private let trackerStore: TrackerStore
     
     // MARK: - Init
     init(context: NSManagedObjectContext = CoreDataManager.shared.context,
          trackerCategoryStore: TrackerCategoryStore = CoreDataManager.shared.trackerCategoryStore,
-         trackerRecordStore: TrackerRecordStore = CoreDataManager.shared.trackerRecordStore) {
+         trackerRecordStore: TrackerRecordStore = CoreDataManager.shared.trackerRecordStore,
+         trackerStore:TrackerStore = CoreDataManager.shared.trackerStore) {
         self.context = context
         self.trackerCategoryStore = trackerCategoryStore
         self.trackerRecordStore = trackerRecordStore
+        self.trackerStore = trackerStore
+        self.weekDay = .monday
         super .init()
         trackerCategoryStore.updatePredicate = { [weak self] in
-            self?.updateFilter(for: self?.weekDay ?? .friday)
+            guard let self else { return }
+            self.updateFilter(selectedWeekDay: self.weekDay, currentFilter: self.currentFilter, searchText: self.searchText)
         }
     }
     
@@ -71,6 +82,46 @@ final class TrackersDataProvider: NSObject {
 
 // MARK: - TrackersDataProviderProtocol
 extension TrackersDataProvider: TrackersDataProviderProtocol {
+    func updateFilter(selectedWeekDay: WeekDay, currentFilter: TrackerFilter, searchText: String? = nil) {
+        self.weekDay = selectedWeekDay
+        self.currentFilter = currentFilter
+        self.searchText = searchText
+        var predicates: [NSPredicate] = []
+        
+        let weekDayPredicate = NSPredicate(
+            format: "timeTable CONTAINS %@",
+            weekDay.rawValue
+        )
+        predicates.append(weekDayPredicate)
+        
+        switch currentFilter {
+        case .all:
+            break
+            
+        case .today:
+           // сегодняшний день передается из контроллера
+            break
+        case .completed:
+            let completedPredicate = NSPredicate(format: "trackerRecord.@count > 0")
+            predicates.append(completedPredicate)
+            
+        case .unfinished:
+            let unfinishedPredicate = NSPredicate(format: "trackerRecord.@count == 0")
+            predicates.append(unfinishedPredicate)
+        }
+
+        if let searchText = searchText, !searchText.isEmpty {
+            let searchPredicate = NSPredicate(format: "name CONTAINS[cd] %@", searchText)
+            predicates.append(searchPredicate)
+          
+        }
+        
+        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+        fetchedResultsController.fetchRequest.predicate = compoundPredicate
+        try? fetchedResultsController.performFetch()
+        delegate?.didUpdateTrackersCollection()
+    }
+    
     var numberOfSections: Int {
         fetchedResultsController.sections?.count ?? 0
     }
@@ -81,32 +132,25 @@ extension TrackersDataProvider: TrackersDataProviderProtocol {
     
     func trackerObject(at indexPath: IndexPath) -> TrackerCoreData? {
         fetchedResultsController.object(at: indexPath)
+     
     }
+   
     
     func categoryObject(at indexPath: IndexPath) -> String? {
         let  category = fetchedResultsController.sections?[indexPath.section]
         return category?.name
     }
     
-    func updateFilter(for day: WeekDay) {
-        weekDay = day
-        fetchedResultsController.fetchRequest.predicate = NSPredicate(
-            format: "timeTable CONTAINS %@",
-            day.rawValue
-        )
-        
-        try? fetchedResultsController.performFetch()
-        delegate?.didUpdateTrackersCollection()
-    }
-    
-    func fetchOrCreateCategory(tracker: Tracker, category: String) throws  {
+    func fetchCategory(tracker: Tracker) throws -> TrackerCoreDataCategory? {
          do {
-             try trackerCategoryStore.fetchOrCreateCategory(tracker: tracker, category: category)
+             let category = try  trackerCategoryStore.findCategoryName( tracker.category)
+             return category
          } catch {
              print("Failed to fetch or create category: \(error)")
              throw error
          }
     }
+   
     
     func addOrDeleteTrackerRecord(tracker: TrackerCoreData, date: Date) throws {
         fetchedResultsController.delegate = nil
@@ -118,6 +162,35 @@ extension TrackersDataProvider: TrackersDataProviderProtocol {
             fetchedResultsController.delegate = self
             throw error
         }
+    }
+    
+    func deleteTracker(_ indexPath: IndexPath) throws {
+       let tracker = fetchedResultsController.object(at: indexPath)
+     
+        do{
+            try  trackerStore.deleteTracker(tracker: tracker)
+        } catch {
+            print("Failed to delete tracker: \(error)")
+            throw error
+        }
+    }
+    func createTracker(tracker: Tracker) throws {
+        guard   let categoryCoreData = try fetchCategory(tracker: tracker) else{return}
+      try?  trackerStore.createTracker(tracker: tracker, category: categoryCoreData)
+    }
+    
+    func editTracker(trackerCoreData: TrackerCoreData, trackerNewData: Tracker) throws {
+        guard let categoryCoreData = try fetchCategory(tracker: trackerNewData) else {return}
+        
+        do{
+            try  trackerStore.editTracker(tracker: trackerCoreData, editTracker: trackerNewData, categoryCoreData: categoryCoreData)
+        } catch {
+            print("Failed to edit tracker: \(error)")
+            throw error
+        }
+    }
+   func trackersStoreNotIsEmpty() -> Bool {
+       trackerStore.trackersStoreNotIsEmpty()
     }
 }
 

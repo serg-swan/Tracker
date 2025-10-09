@@ -10,7 +10,7 @@ import UIKit
 final class WeekDayViewController: UIViewController {
     private let tableView = UITableView(frame: .zero, style: .plain)
     private let returnButton = UIButton()
-    private let cellIdentifier = "cell2"
+    private let cellIdentifier = "WeekDayViewControllerCell"
     private let days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
     var selectedDays: [WeekDay] = []
     var onDaysSelected: (([WeekDay]) -> Void)?
@@ -29,19 +29,14 @@ final class WeekDayViewController: UIViewController {
     }
     
     private func setupTableViewUI() {
-        tableView.estimatedSectionHeaderHeight = 0
-        tableView.estimatedSectionFooterHeight = 0
-        tableView.sectionHeaderHeight = 0
-        tableView.sectionFooterHeight = 0
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-
+        tableView.separatorColor = UIColor(resource: .ypGray)
         tableView.delegate = self
         tableView.dataSource = self
         tableView.layer.cornerRadius = 16
         tableView.clipsToBounds = true
         tableView.isScrollEnabled = true
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
-      
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -95,7 +90,15 @@ final class WeekDayViewController: UIViewController {
 
 extension WeekDayViewController: UITableViewDelegate, UITableViewDataSource {
 
-    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let isLast = indexPath.row == (tableView.numberOfRows(inSection: indexPath.section) - 1)
+        if isLast {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+           
+        } else {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16) 
+        }
+    }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = UITableViewCell(style: .default, reuseIdentifier: cellIdentifier)
@@ -121,7 +124,6 @@ extension WeekDayViewController: UITableViewDelegate, UITableViewDataSource {
         
         return cell
     }
-    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return days.count

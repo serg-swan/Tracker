@@ -11,7 +11,7 @@ final class NewCategoryViewController: UIViewController {
     // MARK: Private Properties
     private lazy var textField = UITextField()
     private let returnButton = UIButton()
-    private var viewModel: CategoryViewModel?
+    private var viewModel: ViewModel?
     
     //MARK: Lifecycle
     override func viewDidLoad() {
@@ -22,7 +22,7 @@ final class NewCategoryViewController: UIViewController {
         setupTextFieldUI()
         setupReturnButtonUI()
     }
-    func initialize(viewModel: CategoryViewModel) {
+    func initialize(viewModel: ViewModel) {
         self.viewModel = viewModel
     }
     

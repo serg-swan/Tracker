@@ -6,32 +6,41 @@
 //
 import UIKit
 
-struct TableviewCellData {
-    var title: String
-    var subtitle: String?
-}
 
-struct CollectionViewData {
-    let name: String
-    var cellData: [String]
-}
 
-final class NewTrackerViewController: UIViewController {
+final class EditTrackerViewController: UIViewController {
     
-    var makeTracker: ((Tracker) -> Void)?
+    var editTracker: ((Tracker) -> Void)?
     
     // MARK: Private Properties
     
-    private var categoryName = ""
-    private var name: String = ""
-    private var emoji: String = ""
-    private var color: String = ""
-    private var timeTable: [WeekDay] = []
+    var categoryName: String = ""
+    var name = String()
+    var emoji = String()
+    var color = String()
+    var record = Int()
+    var timeTable: [WeekDay] = []
+    
+    init(categoryName: String, name: String, emoji: String, color: String, record: Int, timeTable: [WeekDay]) {
+        self.categoryName = categoryName
+        self.name = name
+        self.emoji = emoji
+        self.color = color
+        self.record = record
+        self.timeTable = timeTable
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     private let emojiArray: [String] = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱",
         "😇", "😡", "🥶", "🤔", "🙌", "🍔",
         "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
     ]
+    
     
     private let colorArray: [String] = [
         "Color1", "Color2", "Color3", "Color4", "Color5", "Color6",
@@ -42,15 +51,14 @@ final class NewTrackerViewController: UIViewController {
         CollectionViewData(name: "Emoji", cellData: emojiArray),
         CollectionViewData(name: "Цвет", cellData: colorArray)
     ]
-    
+  
     private lazy var textField = UITextField()
-    private let errorLabel = UILabel()
-    private var errorLabelHeightConstraint: NSLayoutConstraint!
     private lazy var tableView = UITableView(frame: .zero, style: .plain)
     private lazy var collectionView: UICollectionView = .init(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private lazy var makeButton = UIButton()
     private lazy var cancelButton = UIButton()
-    private let tableViewCellIdentifier = "NewTrackerViewControllerCell"
+    private lazy var recordLabel = UILabel()
+    private let tableViewCellIdentifier = "cell"
     private var items = [
         TableviewCellData(title: "Категория", subtitle: nil),
         TableviewCellData(title: "Расписание", subtitle: nil)
@@ -58,32 +66,52 @@ final class NewTrackerViewController: UIViewController {
     private var selectedEmojiIndexPath: IndexPath?
     private var selectedColorIndexPath: IndexPath?
     
+    
     //MARK: Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(resource: .ypWhite)
-        title = "Новая привычка"
+        title = "Редактирование привычки"
         navigationController?.navigationBar.titleTextAttributes = [
             .font: UIFont.systemFont(ofSize: 16, weight: .medium)
         ]
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
+        categorySelection(categoryName, for: IndexPath(row: 0, section: 0) )
+        handleDaySelection(timeTable, for: IndexPath(row: 1, section: 0))
+        setupRecordLabelUI()
         setupTextFieldUI()
         setupTableViewUI()
         setupCancelButtonUI()
         setupMakeButtonUI()
         setupCollectionViewUI()
+        firstSetupSelectedEmojiAndColor(emoji: emoji, color: color)
     }
     
     //MARK: Private Methods
+    private func setupRecordLabelUI() {
+        let localizedString = String(format: NSLocalizedString("days_count", comment: ""), record)
+        recordLabel.text = localizedString
+        recordLabel.textAlignment = .center
+        recordLabel.textColor = UIColor(resource: .ypBlack)
+        recordLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        recordLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(recordLabel)
+        NSLayoutConstraint.activate([
+            recordLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            recordLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            recordLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            recordLabel.heightAnchor.constraint(equalToConstant: 38)
+        ])
+    }
     
     private func setupTextFieldUI() {
         textField.isEnabled = true
         textField.isUserInteractionEnabled = true
         textField.delegate = self
-        textField.placeholder = "Введите название трекера"
+        textField.text = name
         textField.layer.cornerRadius = 16
         textField.clipsToBounds = true
         textField.textColor = UIColor(resource: .ypBlack)
@@ -93,29 +121,15 @@ final class NewTrackerViewController: UIViewController {
         textField.clearButtonMode = .whileEditing
         textField.backgroundColor = UIColor(resource: .ypBackground)
         textField.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        view.addSubview(errorLabel)
-        errorLabel.translatesAutoresizingMaskIntoConstraints = false
-        errorLabel.textColor = UIColor(resource: .ypRed)
-        errorLabel.text = "Ограничение 38 символов"
-        errorLabel.textAlignment = .center
-        errorLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        errorLabel.numberOfLines = 0
-        self.errorLabelHeightConstraint = errorLabel.heightAnchor.constraint(equalToConstant: 0)
-        self.errorLabelHeightConstraint?.isActive = true
         view.addSubview(textField)
         textField.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            textField.topAnchor.constraint(equalTo: recordLabel.bottomAnchor, constant: 40),
             textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            textField.heightAnchor.constraint(equalToConstant: 75),
-            errorLabel.topAnchor.constraint(equalTo: textField.bottomAnchor),
-            errorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            // errorLabel.heightAnchor.constraint(equalToConstant: 22)
+            textField.heightAnchor.constraint(equalToConstant: 75)
         ])
     }
-    
     
     
     private func setupTableViewUI() {
@@ -130,7 +144,7 @@ final class NewTrackerViewController: UIViewController {
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 24),
+            tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: textField.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: textField.trailingAnchor),
             tableView.heightAnchor.constraint(equalToConstant: 150)
@@ -180,12 +194,11 @@ final class NewTrackerViewController: UIViewController {
     private func setupMakeButtonUI() {
         makeButton.addTarget(self, action: #selector(makeButtonTapped), for: .touchUpInside)
         makeButton.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
-        makeButton.backgroundColor = UIColor(resource: .ypGray)
+        makeButton.backgroundColor = UIColor(resource: .ypBlack)
         makeButton.layer.cornerRadius = 16
         makeButton.layer.masksToBounds = true
-        makeButton.isEnabled = false
         makeButton.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        makeButton.setTitle("Создать", for: .normal)
+        makeButton.setTitle("Сохранить", for: .normal)
         view.addSubview(makeButton)
         makeButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -195,14 +208,12 @@ final class NewTrackerViewController: UIViewController {
             makeButton.heightAnchor.constraint(equalToConstant: 60),
         ])
     }
-    
-    
-    private func makeButtonIsEnabled() {
-        if !name.isEmpty && !timeTable.isEmpty && !emoji.isEmpty && !color.isEmpty  && !categoryName.isEmpty {
-            makeButton.isEnabled = true
-            DispatchQueue.main.async {
-                self.makeButton.backgroundColor = UIColor(resource: .ypBlack)
-            }
+    private func firstSetupSelectedEmojiAndColor(emoji: String, color: String) {
+        if let index = emojiArray.firstIndex(of: emoji) {
+            selectedEmojiIndexPath = IndexPath(row: index, section: 0)
+        }
+        if let index = colorArray.firstIndex(of: color) {
+            selectedColorIndexPath = IndexPath(row: index, section: 1)
         }
     }
     
@@ -234,14 +245,14 @@ final class NewTrackerViewController: UIViewController {
         categoryName = category
         items[indexPath.row].subtitle = category
         self.tableView.reloadRows(at: [indexPath], with: .none)
-        self.makeButtonIsEnabled()
+      
     }
     
     
     private func handleDaySelection(_ days: [WeekDay], for indexPath: IndexPath) {
         timeTable = days
         updateCell(at: indexPath, with: days)
-        self.makeButtonIsEnabled()
+       
     }
     
     private func updateCell(at indexPath: IndexPath, with days: [WeekDay]) {
@@ -264,19 +275,20 @@ final class NewTrackerViewController: UIViewController {
     }
     
     @objc private func  makeButtonTapped() {
-        let newTracker = Tracker.newTracker(name: name, emoji: emoji, color: color, timeTable: timeTable,category: categoryName)
-        makeTracker?(newTracker)
+        let newDataTracker = Tracker.newTracker(name: name, emoji: emoji, color: color, timeTable: timeTable, category: categoryName)
+    editTracker?(newDataTracker)
         dismiss(animated: true)
     }
     
     @objc private func  cancelButtonTapped() {
         dismiss(animated: true)
+        
     }
 }
 
 // MARK:  UITextFieldDelegate
 
-extension NewTrackerViewController: UITextFieldDelegate {
+extension EditTrackerViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
@@ -286,35 +298,20 @@ extension NewTrackerViewController: UITextFieldDelegate {
     }
     func textFieldDidEndEditing(_ textField: UITextField) {
         name = textField.text ?? ""
-        self.makeButtonIsEnabled()
-        
+       
     }
     func textField(_ textField: UITextField,
                    shouldChangeCharactersIn range: NSRange,
                    replacementString string: String) -> Bool {
         let currentText = textField.text ?? ""
-        guard let stringRange = Range(range, in: currentText) else { return false }
-        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
-        if updatedText.count > 38 {
-            self.errorLabelHeightConstraint.constant = 37
-            UIView.animate(withDuration: 0.25) {
-                self.view.layoutIfNeeded()
-            }
-            return false
-        } else {
-            self.errorLabelHeightConstraint.constant = 0
-            UIView.animate(withDuration: 0.25) {
-                self.view.layoutIfNeeded()
-            }
-            return true
-        }
+        let newLength = currentText.count + string.count - range.length
+        return newLength <= 38
     }
 }
 
-
 // MARK: UITableViewDelegate, UITableViewDataSource
 
-extension NewTrackerViewController: UITableViewDelegate, UITableViewDataSource {
+extension EditTrackerViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let isLast = indexPath.row == (tableView.numberOfRows(inSection: indexPath.section) - 1)
         if isLast {
@@ -359,7 +356,7 @@ extension NewTrackerViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-extension NewTrackerViewController: UICollectionViewDataSource {
+extension EditTrackerViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return collectionViewDataSource.count
     }
@@ -385,11 +382,13 @@ extension NewTrackerViewController: UICollectionViewDataSource {
             cell.layer.cornerRadius = 16
             
         case 1:
-            let colorName = collectionViewDataSource[section].cellData[indexPath.item]
-            let color = UIColor(named: colorName) ?? .clear
             if indexPath == selectedColorIndexPath {
+                let color = UIColor(named: color) ?? .clear
                 cell.setCompleted(color)
             }
+            let colorName = collectionViewDataSource[section].cellData[indexPath.item]
+            let color = UIColor(named: colorName) ?? .clear
+            
             
             cell.titleLabel.backgroundColor = color
             cell.layer.cornerRadius = 11.0
@@ -411,7 +410,7 @@ extension NewTrackerViewController: UICollectionViewDataSource {
     }
 }
 
-extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
+extension EditTrackerViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         let width = collectionView.bounds.width
         let height: CGFloat
@@ -448,13 +447,11 @@ extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
         case 0:
             emoji = collectionViewDataSource[section].cellData[indexPath.item]
             selectedEmojiIndexPath = indexPath
-            self.makeButtonIsEnabled()
             collectionView.reloadData()
             
         case 1:
             color = collectionViewDataSource[section].cellData[indexPath.item]
             selectedColorIndexPath = indexPath
-            self.makeButtonIsEnabled()
             collectionView.reloadData()
             
         default:
