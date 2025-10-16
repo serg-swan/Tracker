@@ -7,10 +7,10 @@
 
 
 
-
+// MARK: - Tab bar
 trackers = "Трекеры";
 statistics = "Статистика";
+
+// MARK: - Filters
 filters = "Фильтры";
-day = "День";
-"days_for234" = "Дня";
-days = "Дней";
+

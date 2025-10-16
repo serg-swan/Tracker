@@ -35,7 +35,7 @@ final class TrackersViewController: UIViewController {
     //MARK: Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        AnalyticsService.reportEvent(event: "open", screen: "Main")
+        AnalyticsService.reportEvent(event: .open, screen: .main)
         trackersDataProvider?.delegate = self
         view.backgroundColor = UIColor(resource: .ypWhite)
         setupNavigationBarUI()
@@ -313,7 +313,7 @@ final class TrackersViewController: UIViewController {
         
         let navVC = UINavigationController(rootViewController: newTrackerVC)
         present(navVC, animated: true)
-        AnalyticsService.reportEvent(event: "click", screen: "Main", item: "add_track")
+        AnalyticsService.reportEvent(event: .click, screen: .main, item: .addTrack)
     }
     
     @objc private func handleFilterButtonTapped() {
@@ -325,7 +325,7 @@ final class TrackersViewController: UIViewController {
         }
         let navVC = UINavigationController(rootViewController: filterVC)
         present(navVC, animated: true)
-        AnalyticsService.reportEvent(event: "click", screen: "Main", item: "filter")
+        AnalyticsService.reportEvent(event: .click, screen: .main, item: .filter)
     }
 }
 
@@ -402,12 +402,12 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         return UIContextMenuConfiguration(identifier: indexPath as NSCopying, previewProvider: nil) { _ in
             let editAction = UIAction(title: "Редактировать") { _ in
                 self.editTracker(at: indexPath)
-                AnalyticsService.reportEvent(event: "click", screen: "Main", item: "edit")
+                AnalyticsService.reportEvent(event: .click, screen: .main, item: .edit)
             }
             
             let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { _ in
                 self.deleteTracker(indexPath: indexPath)
-                AnalyticsService.reportEvent(event: "click", screen: "Main", item: "delete")
+                AnalyticsService.reportEvent(event: .click, screen: .main, item: .delete)
             }
             
             return UIMenu(children: [editAction, deleteAction])

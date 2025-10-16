@@ -28,7 +28,7 @@ final class StatsViewController: UIViewController {
         setupStackViewUI()
         setupPlaceholderViewUI()
         viewModel?.loadRecordCount()
-        AnalyticsService.reportEvent(event: "close", screen: "Main")
+        AnalyticsService.reportEvent(event: .close, screen: .main)
     }
     
     override func viewDidLayoutSubviews() {

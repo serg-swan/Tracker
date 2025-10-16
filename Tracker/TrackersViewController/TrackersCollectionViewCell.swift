@@ -121,7 +121,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     
     @objc private func didTapCompleteButton() {
         delegate?.updateCompletedTrackers(self)
-        AnalyticsService.reportEvent(event: "click", screen: "Main", item: "track")
+        AnalyticsService.reportEvent(event: .click, screen: .main, item: .track)
     }
     
 }
