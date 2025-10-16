@@ -31,18 +31,6 @@ public final class TrackerCategoryStore {
         return category
     }
     
-    func fetchOrCreateCategory(tracker: Tracker, category: String) throws {
-        let targetCategory: TrackerCoreDataCategory
-        guard let existingCategory = try? findCategoryName(category) else {
-            let newCategory = TrackerCoreDataCategory(context: context)
-            newCategory.categoryName = category
-            return targetCategory = newCategory
-        }
-        targetCategory = existingCategory
-        
-        try trackerStore.createTracker(tracker: tracker, category: targetCategory)
-    }
-    
     func createTrackerCategory (category: String) throws {
         let trackerCategoryCoreData = TrackerCoreDataCategory(context: context)
         trackerCategoryCoreData.categoryName = category
@@ -61,4 +49,3 @@ public final class TrackerCategoryStore {
     }
     
 }
-

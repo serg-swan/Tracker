@@ -25,10 +25,19 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         super.init(frame: frame)
         setupUI()
         setupConstraints()
+      
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        dayCountLabel.text = nil
+        trackerLabel.backgroundColor = .clear
+        nameLabel.text = nil
+        emojiLabel.text = nil
     }
     
     private func addSubviews() {
@@ -75,25 +84,22 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         ])
     }
     func dayString(for count: Int) {
-        let formattedString: String
-           switch (count % 10, count % 100) {
-           case (1, let r100) where r100 != 11:
-               formattedString = "\(count) день"
-           case (2...4, let r100) where !(12...14).contains(r100):
-               formattedString = "\(count) дня"
-           default:
-               formattedString = "\(count) дней"
-           }
-           dayCountLabel.text = formattedString
+        let localizedString = String(format: NSLocalizedString("days_count", comment: ""), count)
+        dayCountLabel.text = localizedString
        }
     
     private func setupUI() {
         contentView.isUserInteractionEnabled = true
         managementLabel.isUserInteractionEnabled = true
         button.isUserInteractionEnabled = true
-        trackerLabel.layer.cornerRadius = 12
+        trackerLabel.layer.cornerRadius = 16
         trackerLabel.clipsToBounds = true
-        nameLabel.textColor = UIColor(named: "YP White")
+        emojiLabel.layer.cornerRadius = 12
+        emojiLabel.textAlignment = .center
+        emojiLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        emojiLabel.clipsToBounds = true
+        emojiLabel.backgroundColor = UIColor(resource: .backgroundEmoji)
+        nameLabel.textColor = UIColor(resource: .ypWhiteOnli)
         nameLabel.font = .systemFont(ofSize: 12, weight: .medium)
         dayCountLabel.font = .systemFont(ofSize: 12, weight: .medium)
         dayCountLabel.text = "0 деней"
@@ -110,10 +116,12 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         } else {
             button.setImage(coloredImage, for: .normal)
         }
+        
     }
     
     @objc private func didTapCompleteButton() {
         delegate?.updateCompletedTrackers(self)
+        AnalyticsService.reportEvent(event: .click, screen: .main, item: .track)
     }
     
 }

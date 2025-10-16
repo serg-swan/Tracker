@@ -9,7 +9,7 @@ import UIKit
 final class EditCategoryViewController: UIViewController {
     private lazy var textField = UITextField()
     private let returnButton = UIButton()
-    private var viewModel: CategoryViewModel?
+    private var viewModel: ViewModel?
    
     private lazy var indexPath: IndexPath = .init(row: 0, section:  0)
     override func viewDidLoad() {
@@ -20,7 +20,7 @@ final class EditCategoryViewController: UIViewController {
         setupTextFieldUI()
         setupReturnButtonUI()
     }
-    func initialize(viewModel: CategoryViewModel) {
+    func initialize(viewModel: ViewModel) {
         self.viewModel = viewModel
      bind()
     }

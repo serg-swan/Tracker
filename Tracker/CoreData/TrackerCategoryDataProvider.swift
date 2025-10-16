@@ -48,7 +48,8 @@ final class TrackerCategoryDataProvider: NSObject {
     
     func object(at indexPath: IndexPath) -> String? {
       let categoryCoreData = fetchedResultsController.object(at: indexPath)
-        return categoryCoreData.categoryName
+       return categoryCoreData.categoryName
+        
     }
     func createNewCategory(withName name: String) throws {
         do {

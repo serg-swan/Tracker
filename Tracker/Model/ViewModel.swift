@@ -1,5 +1,5 @@
 //
-//  CategoryViewModel.swift
+//  ViewModel.swift
 //  Tracker
 //
 //  Created by Сергей Лебедь on 13.09.2025.
@@ -8,8 +8,9 @@
 import Foundation
 typealias Binding<T> = (T) -> Void
 
-final class CategoryViewModel {
-   
+final class ViewModel {
+    //MARK: Public properties
+    
     lazy var newNameCategory: String = ""
     lazy var createNameCategory: String = ""
     lazy var categorySelect: String = "" {
@@ -20,24 +21,46 @@ final class CategoryViewModel {
     var indexPath: Binding<IndexPath>?
     var categorySelectUpdate: Binding<String>?
     var categoriesUpdate: (() -> Void)?
-    private let model: TrackerCategoryDataProvider
+    var recordUpdate: Binding<String>?
     
-    init(for model: TrackerCategoryDataProvider) {
+    //MARK: Public properties
+    
+    private let model: TrackerCategoryDataProvider
+    private let modelRecord: TrackerRecordDataProvider
+    
+    //MARK: Initializers
+    
+    init(for model: TrackerCategoryDataProvider, modelRecord: TrackerRecordDataProvider) {
         self.model = model
+        self.modelRecord = modelRecord
         bind()
     }
+
     private func bind() {
         model.onCategoriesDidChange = { [weak self]  in
             self?.categoriesUpdate?()
         }
+        modelRecord.onRecordDidChange = { [weak self] count in
+            self?.fetchCountAsString(count)
+        }
     }
     
+    //MARK: Public methods
+    
+    func fetchCountAsString(_ count: Int) {
+        let text = "\(count)"
+        recordUpdate?(text)
+    }
+    func loadRecordCount(){
+        let count = modelRecord.fetchedObjects()
+        fetchCountAsString(count)
+    }
     func fetchedObjects() -> Int {
         model.fetchedObjects()
     }
     
     func object(at indexPath: IndexPath) -> String {
-       let coreDataCategory = model.object(at:indexPath)
+        let coreDataCategory = model.object(at:indexPath)
         return coreDataCategory ?? ""
     }
     
@@ -51,4 +74,5 @@ final class CategoryViewModel {
     func updateCategory(indexPath: IndexPath, newName: String) throws {
         try? model.updateCategory(indexPath: indexPath, newName: newName)
     }
+    
 }

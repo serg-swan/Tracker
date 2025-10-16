@@ -14,11 +14,17 @@ final class TabBarController: UITabBarController {
         setupTopBorder()
         
         let trackersVC = TrackersViewController()
-        trackersVC.tabBarItem = UITabBarItem(title: "Трекеры",
+        let trackersString = NSLocalizedString("trackers", comment: "")
+        trackersVC.tabBarItem = UITabBarItem(title: trackersString,
                                              image: UIImage(resource: .trackers),
                                                          selectedImage: nil)
         let statsVC = StatsViewController()
-        statsVC.tabBarItem = UITabBarItem(title: "Статистика",
+        let modelRecord = TrackerRecordDataProvider()
+        let model = TrackerCategoryDataProvider()
+        let viewModel = ViewModel(for: model, modelRecord: modelRecord)
+        statsVC.initialize(viewModel: viewModel)
+        let statisticsString = NSLocalizedString("statistics", comment: "")
+        statsVC.tabBarItem = UITabBarItem(title: statisticsString,
                                           image: UIImage(resource: .stats),
                                                       selectedImage: nil)
         let trackersNavVC = UINavigationController(rootViewController: trackersVC)

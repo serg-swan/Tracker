@@ -1,5 +1,5 @@
 //
-//  NewCategoryTableViewCell.swift
+//  CategoryTableViewCell.swift
 //  Tracker
 //
 //  Created by Сергей Лебедь on 21.09.2025.
@@ -7,9 +7,9 @@
 
 import UIKit
 
-final class NewCategoryTableViewCell: UITableViewCell {
+final class CategoryTableViewCell: UITableViewCell {
     
-    static let cellIdentifier = "NewCategoryTableViewCell"
+    static let cellIdentifier = "CategoryTableViewCell"
     lazy var titleLabel = UILabel()
     lazy var separator = UIView()
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -34,7 +34,6 @@ final class NewCategoryTableViewCell: UITableViewCell {
             separator.bottomAnchor.constraint(equalTo: bottomAnchor),
             separator.heightAnchor.constraint(equalToConstant: 0.5)
         ])
-        separator.isHidden = false
     backgroundColor = UIColor(resource: .ypBackground)
     titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
     layer.cornerRadius = 16
@@ -47,7 +46,7 @@ final class NewCategoryTableViewCell: UITableViewCell {
     override func prepareForReuse() {
           super.prepareForReuse()
           titleLabel.text = nil
-          separator.isHidden = false
           accessoryType = .none
+        separator.isHidden = false
       }
 }

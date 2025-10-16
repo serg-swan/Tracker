@@ -14,7 +14,7 @@ final class CategoryViewController: UIViewController {
     private lazy var newCategoryButton = UIButton()
     private var selectedCategories: String = ""
     private let placeholderView =  UIView()
-    private var viewModel: CategoryViewModel?
+    private var viewModel: ViewModel?
     
     //MARK: Lifecycle
     override func viewDidLoad() {
@@ -30,15 +30,13 @@ final class CategoryViewController: UIViewController {
         tableView.reloadData()
         updatePlaceholderVisibility()
     }
-    func initialize(viewModel: CategoryViewModel) {
+    func initialize(viewModel: ViewModel) {
         self.viewModel = viewModel
         bind()
     }
     private func bind() {
         guard let viewModel = viewModel else { return }
-      
         viewModel.categoriesUpdate = { [weak self]  in
-                self?.updatePlaceholderVisibility()
                 self?.tableView.reloadData()
         }
     }
@@ -85,7 +83,6 @@ final class CategoryViewController: UIViewController {
                 let hasData = viewModel.fetchedObjects() != 0
         DispatchQueue.main.async {
             self.placeholderView.isHidden = hasData
-            self.tableView.isHidden = !hasData
         }
     }
    
@@ -101,7 +98,7 @@ final class CategoryViewController: UIViewController {
         tableView.layer.cornerRadius = 16
         tableView.clipsToBounds = true
         tableView.isScrollEnabled = true
-        tableView.register(NewCategoryTableViewCell.self, forCellReuseIdentifier: NewCategoryTableViewCell.cellIdentifier)
+        tableView.register(CategoryTableViewCell.self, forCellReuseIdentifier: CategoryTableViewCell.cellIdentifier)
         tableView.allowsMultipleSelection = false
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -132,19 +129,19 @@ final class CategoryViewController: UIViewController {
     }
     //MARK: - Action
     @objc private func newCategoryButtonTapped(){
-    
-        let nevCategoryVC = NewCategoryViewController()
+        let newCategoryVC = NewCategoryViewController()
+        let modelRecord = TrackerRecordDataProvider()
         let model = TrackerCategoryDataProvider()
-        let viewModel = CategoryViewModel(for: model)
-        nevCategoryVC.initialize(viewModel: viewModel)
-        let navVC = UINavigationController(rootViewController: nevCategoryVC)
+        let viewModel = ViewModel(for: model, modelRecord: modelRecord)
+        newCategoryVC.initialize(viewModel: viewModel)
+        let navVC = UINavigationController(rootViewController: newCategoryVC)
         present(navVC, animated: true)
     }
 }
 //MARK: - UITableViewDelegate
 extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: NewCategoryTableViewCell.cellIdentifier, for: indexPath) as? NewCategoryTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: CategoryTableViewCell.cellIdentifier, for: indexPath) as? CategoryTableViewCell else {
             return UITableViewCell()
         }
        guard let viewModel else { return UITableViewCell() }
@@ -159,21 +156,17 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
         cell.titleLabel.text = viewModel.object(at: indexPath)
         if cell.titleLabel.text == viewModel.categorySelect {
             cell.accessoryType = .checkmark
-            print(selectedCategories)
         } else {
             cell.accessoryType = .none
-            print(selectedCategories)
         }
-       
         if indexPath.row == count - 1 {
             cell.separator.isHidden = true
-           
         }
-     
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        updatePlaceholderVisibility()
         return viewModel?.fetchedObjects() ?? 0
     }
     
@@ -206,7 +199,7 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
                     title: "Удалить",
                     attributes: .destructive
                 ) { [weak self] _ in
-                    self?.deleteCategory(indexPath: indexPath)
+                        self?.deleteCategory(indexPath: indexPath)
                 }
                 
                 return UIMenu(children: [editAction, deleteAction])
@@ -215,8 +208,9 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
         
         private func editCategory(_ indexPath: IndexPath) {
                 let editCategoryVC = EditCategoryViewController()
-                let model = TrackerCategoryDataProvider()
-                let viewModel = CategoryViewModel(for: model)
+            let modelRecord = TrackerRecordDataProvider()
+            let model = TrackerCategoryDataProvider()
+            let viewModel = ViewModel(for: model, modelRecord: modelRecord)
                 editCategoryVC.initialize(viewModel: viewModel)
                 viewModel.indexPath?(indexPath)
                 let navVC = UINavigationController(rootViewController: editCategoryVC)
@@ -224,10 +218,19 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         private func deleteCategory(indexPath: IndexPath) {
-            try? viewModel?.deleteCategory(indexPath: indexPath)
-           DispatchQueue.main.async {
-               self.tableView.reloadData()
-           }
+            let actionSheet = UIAlertController(
+                title: "Эта категория точно не нужна?", message: nil, preferredStyle: .actionSheet
+            )
+            let deleteCategory = UIAlertAction(
+                title: "Удалить", style: .destructive
+            ){ _ in
+                try? self.viewModel?.deleteCategory(indexPath: indexPath)
+                   self.tableView.reloadData()
+            }
+            let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
+          actionSheet.addAction(deleteCategory)
+            actionSheet.addAction(cancelAction)
+            present(actionSheet, animated: true)
             
         }
     }

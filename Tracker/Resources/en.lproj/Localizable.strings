@@ -1,0 +1,15 @@
+/*
+  Localizable.strings
+  Tracker
+
+  Created by Сергей Лебедь on 28.09.2025.
+  */
+
+
+
+// MARK: - Tab bar
+trackers = "Trackers";
+statistics = "Statistics";
+
+// MARK: - Filters
+filters = "Filters";
